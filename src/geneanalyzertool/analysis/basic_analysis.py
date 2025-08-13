@@ -4,7 +4,7 @@ from typing import Any, override
 
 class BasicSequenceAnalysis(Analysis):
     """
-    # sequence is already a string
+    Class for basic analysis performed on dna, rna or protein sequences
 
     """
 
@@ -23,6 +23,7 @@ class BasicSequenceAnalysis(Analysis):
 
         if method not in method_dispatch:
             raise ValueError(f"Uknown mehtod {method}")
+        
         return method_dispatch[method](sequence)
 
 
@@ -32,7 +33,7 @@ class BasicSequenceAnalysis(Analysis):
         Sequence must be of type RNA or DNA. 
         """
         if not isinstance(sequence, (DNA, RNA)):
-            raise TypeError("Sequence must be of type DNA or RNA")
+            raise TypeError("Error: Sequence must be of type DNA or RNA")
         
         gc_count = sequence.upper().count("G") + sequence.upper().count("C")
         return (gc_count/len(sequence))*100
@@ -49,6 +50,7 @@ class BasicSequenceAnalysis(Analysis):
             'G': sequence.upper().count('G'),
             'C': sequence.upper().count('C')
         }
+
         return base_counts
     
     def _translate(self, sequence) -> Protein:
@@ -56,7 +58,8 @@ class BasicSequenceAnalysis(Analysis):
         Translates a given RNA sequence into a predicted protein sequence minus
         post tranlational modificaitons. Sequnce provided must be of type RNA. 
         """
-        peptide_table = {"UUU": "F", "UUC": "F", "UUA": "L", "UUG": "L",
+        peptide_table = {
+            "UUU": "F", "UUC": "F", "UUA": "L", "UUG": "L",
              "UCU": "S", "UCC": "S", "UCA": "S", "UCG": "S",
              "UAU": "Y", "UAC": "Y", "UAA": "STOP", "UAG": "STOP",
              "UGU": "C", "UGC": "C", "UGA": "STOP", "UGG": "W",
@@ -71,10 +74,11 @@ class BasicSequenceAnalysis(Analysis):
              "GUU": "V", "GUC": "V", "GUA": "V", "GUG": "V",
              "GCU": "A", "GCC": "A", "GCA": "A", "GCG": "A",
              "GAU": "D", "GAC": "D", "GAA": "E", "GAG": "E",
-             "GGU": "G", "GGC": "G", "GGA": "G", "GGG": "G", }
+             "GGU": "G", "GGC": "G", "GGA": "G", "GGG": "G", 
+             }
         
         if not isinstance(sequence, RNA):
-            raise TypeError("Sequence must be of type RNA. ")
+            raise TypeError("Error: Sequence must be of type RNA.")
         
         
         protein_seq = ""
@@ -98,7 +102,7 @@ class BasicSequenceAnalysis(Analysis):
         Sequence provided must be of type DNA.
         """
         if not isinstance(sequence, DNA):
-            raise TypeError("Sequence must be of type DNA")
+            raise TypeError("Error: Sequence must be of type DNA")
         
         rna_sequence = sequence.replace("T", "U")
         return RNA(rna_sequence)
@@ -109,7 +113,7 @@ class BasicSequenceAnalysis(Analysis):
         Sequence provided must be of type DNA.
         """
         if not isinstance(sequence, (DNA, RNA)):
-            raise TypeError("Sequence must be of type DNA or RNA")
+            raise TypeError("Error: Sequence must be of type DNA or RNA")
         
         if isinstance(sequence, DNA):
             reverse_complement = sequence.translate(str.maketrans("ATGCatgc", "TACGtacg"))[::-1]
