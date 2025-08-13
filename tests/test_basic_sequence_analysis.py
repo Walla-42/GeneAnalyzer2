@@ -12,14 +12,14 @@ def analyzer():
 def test_gc_percent_dna(analyzer):
     seq = DNA("ATGCGC")
     result = analyzer._gc_percent(seq)
-    expected = (seq.seq.upper().count("G") + seq.seq.upper().count("C")) / len(seq.seq) * 100
+    expected = (seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100
     assert result == expected
 
 
 def test_gc_percent_rna(analyzer):
     seq = RNA("AUGCGC")
     result = analyzer._gc_percent(seq)
-    expected = (seq.seq.upper().count("G") + seq.seq.upper().count("C")) / len(seq.seq) * 100
+    expected = (seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100
     assert result == expected
 
 
@@ -48,7 +48,7 @@ def test_translate_valid(analyzer):
     seq = RNA("AUGUUUUAA")  
     protein = analyzer._translate(seq)
     assert isinstance(protein, Protein)
-    assert protein.seq == "MF*" 
+    assert protein == "MF*" 
 
 
 def test_translate_invalid_type(analyzer):
@@ -61,7 +61,7 @@ def test_transcribe_dna_to_rna(analyzer):
     seq = DNA("ATGC")
     rna = analyzer._transcribe(seq)
     assert isinstance(rna, RNA)
-    assert rna.seq == "AUGC"
+    assert rna == "AUGC"
 
 
 def test_transcribe_invalid_type(analyzer):
@@ -74,14 +74,14 @@ def test_reverse_complement_dna(analyzer):
     seq = DNA("ATGC")
     revcomp = analyzer._reverse_complement(seq)
     assert isinstance(revcomp, DNA)
-    assert revcomp.seq == "GCAT"
+    assert revcomp == "GCAT"
 
 
 def test_reverse_complement_rna(analyzer):
     seq = RNA("AUGC")
     revcomp = analyzer._reverse_complement(seq)
     assert isinstance(revcomp, RNA)
-    assert revcomp.seq == "GCAU"
+    assert revcomp == "GCAU"
 
 
 def test_reverse_complement_invalid_type(analyzer):
@@ -91,10 +91,30 @@ def test_reverse_complement_invalid_type(analyzer):
 
 # ---------- analyze() dispatcher ----------
 def test_analyze_dispatch_calls_gc_percent(analyzer):
-    seq = DNA("ATGC")
-    result = analyzer.analyze(seq, "gc_percent")
-    expected = analyzer._gc_percent(seq)
-    assert result == expected
+    DNA_analysis = ["gc_percent", "base_count", "transcribe", "reverse_complement"]
+    RNA_analysis = ["translate", "reverse_complement", "gc_percent", "base_count"]
+    protein_analysis = []
+    analysis_types = [DNA_analysis, RNA_analysis, protein_analysis]
+
+    for analysis_type in analysis_types:
+        try:
+            if analysis_type is DNA_analysis:
+                sequence_type = DNA
+            elif analysis_type is RNA_analysis:
+                sequence_type = RNA
+            elif analysis_type is protein_analysis:
+                sequence_type = Protein
+            else:
+                raise TypeError("Unrecognized anlysis type")
+        except TypeError as e:
+            pytest.fail(e)
+
+        for analysis in analysis_type:
+            seq = sequence_type("ATGC")
+            result = analyzer.analyze(seq, analysis)
+            expected = getattr(analyzer, f"_{analysis}")(seq)
+            assert result == expected
+    
 
 
 def test_analyze_invalid_method(analyzer):

@@ -4,7 +4,7 @@ from typing import Any, override
 
 class BasicSequenceAnalysis(Analysis):
     """
-    A class to handle simple analysis such as the following:
+    # sequence is already a string
 
     """
 
@@ -33,7 +33,6 @@ class BasicSequenceAnalysis(Analysis):
         """
         if not isinstance(sequence, (DNA, RNA)):
             raise TypeError("Sequence must be of type DNA or RNA")
-        sequence = sequence.seq
         
         gc_count = sequence.upper().count("G") + sequence.upper().count("C")
         return (gc_count/len(sequence))*100
@@ -44,7 +43,6 @@ class BasicSequenceAnalysis(Analysis):
         Counts the number of each base in a DNA sequence.
         Sequence provided must be of type DNA or RNA.
         """
-        sequence = sequence.seq
         base_counts = {
             'A': sequence.upper().count('A'),
             'T': sequence.upper().count('T'),
@@ -78,22 +76,21 @@ class BasicSequenceAnalysis(Analysis):
         if not isinstance(sequence, RNA):
             raise TypeError("Sequence must be of type RNA. ")
         
-        sequence = sequence.seq
         
-        protein_seq = Protein("")
+        protein_seq = ""
         
         for i in range(0, len(sequence), 3):
             codon = sequence[i:i+3]
             if peptide_table.get(codon) == "STOP":
-                protein_seq.add_peptide("*")
+                protein_seq += "*"
                 break
             
             if (peptide := peptide_table.get(codon)) is None:
-                protein_seq.add_peptide("X")
+                protein_seq += "X"
             else:
-                protein_seq.add_peptide(peptide)
+                protein_seq += peptide
 
-        return protein_seq
+        return Protein(protein_seq)
     
     def _transcribe(self, sequence: DNA) -> RNA:
         """
@@ -103,7 +100,7 @@ class BasicSequenceAnalysis(Analysis):
         if not isinstance(sequence, DNA):
             raise TypeError("Sequence must be of type DNA")
         
-        rna_sequence = sequence.seq.replace("T", "U")
+        rna_sequence = sequence.replace("T", "U")
         return RNA(rna_sequence)
     
     def _reverse_complement(self, sequence: DNA | RNA) -> DNA | RNA:
@@ -115,9 +112,9 @@ class BasicSequenceAnalysis(Analysis):
             raise TypeError("Sequence must be of type DNA or RNA")
         
         if isinstance(sequence, DNA):
-            reverse_complement = sequence.seq.translate(str.maketrans("ATGCatgc", "TACGtacg"))[::-1]
+            reverse_complement = sequence.translate(str.maketrans("ATGCatgc", "TACGtacg"))[::-1]
             return DNA(reverse_complement)
         
         if isinstance(sequence, RNA):
-            reverse_complement = sequence.seq.translate(str.maketrans("AUGCaugc", "UACGuacg"))[::-1]
+            reverse_complement = sequence.translate(str.maketrans("AUGCaugc", "UACGuacg"))[::-1]
             return RNA(reverse_complement)
