@@ -36,7 +36,7 @@ class BasicSequenceAnalysis(Analysis):
             raise TypeError("Error: Sequence must be of type DNA or RNA")
         
         gc_count = sequence.upper().count("G") + sequence.upper().count("C")
-        return (gc_count/len(sequence))*100
+        return round((gc_count/len(sequence))*100, 2)
         
     
     def _base_count(self, sequence) -> dict:

@@ -72,30 +72,33 @@ def main():
 
     if args.file:
         filehandler = FileHandler()
-        available_sequences = filehandler.read_in_sequence(args.sequence)
+        available_sequences, sequence_keys = filehandler.read_in_sequence(args.sequence)
     else:
-        available_sequences = args.sequence
+        # Treat the single sequence as a dict with one entry
+        available_sequences = {"input_sequence": args.sequence}
+        sequence_keys = ["input_sequence"]
 
-    for sequence in available_sequences:
-        print(f"Anlyzing {sequence.key}...")
+    results = []
+    for key in sequence_keys:
+        print(f"Analyzing {key}...")
         type_map = {"DNA": DNA, "RNA": RNA, "Protein": Protein}
         seq_type = type_map[args.type]
-        sequence_obj = seq_type(sequence.value)
-        
+        sequence_obj = seq_type(available_sequences[key])
+
         try:
             result = analyzer.analyze(sequence_obj, args.analysis)
-            if args.out:
-                with open(args.out, 'w') as out_file:
-                    out_file.write(f"{sequence.key}: {result}\n")
-            else:
-                print(result)
+            results.append(f"{key}: {result}")
         except Exception as e:
-            print(f"Error: Analysis interupted - {e}")
+            print(f"Error: Analysis interrupted - {e}")
             exit(1)
 
-        
-
-
+    if args.out:
+        with open(args.out, 'w') as out_file:
+            for line in results:
+                out_file.write(line + "\n")
+    else:
+        for line in results:
+            print(line)
 
 
 if __name__ == "__main__":
