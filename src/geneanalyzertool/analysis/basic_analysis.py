@@ -13,20 +13,20 @@ class BasicSequenceAnalysis(Analysis):
         """
         executes simple analysis of protein, RNA or DNA sequences.
         """
-        methodDispatch = {
-            "gcPercent": self.gcPercent,
-            "baseCount": self.baseCount,
-            "translate": self.translate,
-            "transcribe": self.transcribe,
-            "reverseComplement": self.reverseComplement
+        method_dispatch = {
+            "gc_percent": self._gc_percent,
+            "base_count": self._base_count,
+            "translate": self._translate,
+            "transcribe": self._transcribe,
+            "reverse_complement": self._reverse_complement
         }
 
-        if method not in methodDispatch:
+        if method not in method_dispatch:
             raise ValueError(f"Uknown mehtod {method}")
-        return methodDispatch[method](sequence)
+        return method_dispatch[method](sequence)
 
 
-    def gcPercent(self, sequence: DNA | RNA) -> float:
+    def _gc_percent(self, sequence: DNA | RNA) -> float:
         """
         Calculates the percent Guanine and Cytosine that are present in a DNA or RNA Molecule.
         Sequence must be of type RNA or DNA. 
@@ -35,11 +35,11 @@ class BasicSequenceAnalysis(Analysis):
             raise TypeError("Sequence must be of type DNA or RNA")
         sequence = sequence.seq
         
-        gcCount = sequence.upper().count("G") + sequence.upper().count("C")
-        return (gcCount/len(sequence))*100
+        gc_count = sequence.upper().count("G") + sequence.upper().count("C")
+        return (gc_count/len(sequence))*100
         
     
-    def baseCount(self, sequence) -> dict:
+    def _base_count(self, sequence) -> dict:
         """
         Counts the number of each base in a DNA sequence.
         Sequence provided must be of type DNA or RNA.
@@ -53,12 +53,12 @@ class BasicSequenceAnalysis(Analysis):
         }
         return base_counts
     
-    def translate(self, sequence) -> Protein:
+    def _translate(self, sequence) -> Protein:
         """
         Translates a given RNA sequence into a predicted protein sequence minus
         post tranlational modificaitons. Sequnce provided must be of type RNA. 
         """
-        peptideTable = {"UUU": "F", "UUC": "F", "UUA": "L", "UUG": "L",
+        peptide_table = {"UUU": "F", "UUC": "F", "UUA": "L", "UUG": "L",
              "UCU": "S", "UCC": "S", "UCA": "S", "UCG": "S",
              "UAU": "Y", "UAC": "Y", "UAA": "STOP", "UAG": "STOP",
              "UGU": "C", "UGC": "C", "UGA": "STOP", "UGG": "W",
@@ -80,22 +80,22 @@ class BasicSequenceAnalysis(Analysis):
         
         sequence = sequence.seq
         
-        proteinSeq = Protein("")
+        protein_seq = Protein("")
         
         for i in range(0, len(sequence), 3):
             codon = sequence[i:i+3]
-            if peptideTable.get(codon) == "STOP":
-                proteinSeq.addPeptide("*")
+            if peptide_table.get(codon) == "STOP":
+                protein_seq.add_peptide("*")
                 break
             
-            if (peptide := peptideTable.get(codon)) == None:
-                proteinSeq.addPeptide("X")
+            if (peptide := peptide_table.get(codon)) is None:
+                protein_seq.add_peptide("X")
             else:
-                proteinSeq.addPeptide(peptide)
+                protein_seq.add_peptide(peptide)
 
-        return proteinSeq
+        return protein_seq
     
-    def transcribe(self, sequence: DNA) -> RNA:
+    def _transcribe(self, sequence: DNA) -> RNA:
         """
         Transcribes a given DNA sequence into an RNA sequence.
         Sequence provided must be of type DNA.
@@ -106,7 +106,7 @@ class BasicSequenceAnalysis(Analysis):
         rna_sequence = sequence.seq.replace("T", "U")
         return RNA(rna_sequence)
     
-    def reverseComplement(self, sequence: DNA | RNA) -> DNA | RNA:
+    def _reverse_complement(self, sequence: DNA | RNA) -> DNA | RNA:
         """
         Returns the reverse complement of a given DNA sequence.
         Sequence provided must be of type DNA.

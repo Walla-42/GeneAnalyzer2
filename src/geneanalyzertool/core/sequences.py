@@ -16,7 +16,7 @@ class RNA(Sequence):
 
 class Protein(Sequence):
 
-    def addPeptide(self, peptide):
+    def add_peptide(self, peptide):
         self.seq += peptide
 
     
