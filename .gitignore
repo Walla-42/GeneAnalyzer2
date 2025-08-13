@@ -53,6 +53,11 @@ cover/
 results.json
 .pytest_cache
 
+#generated test files:
+test_fasta.fasta 
+test_results.txt 
+
+
 
 # Translations
 *.mo
