@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/walla-42/GeneAnalyzer2">
-    <img src="images/GeneAnalyzer2Logo.png" alt="Logo">
+    <img src="/docs/images/GeneAnalyzer2Logo.png" alt="Logo">
   </a>
 </div>
 
