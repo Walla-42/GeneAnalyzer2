@@ -1,31 +1,33 @@
-[project]
-name = "geneanalyzertool"
-version = "1.0"
-description = "Bioinformatics command line tool created to extend the original GeneAnalyzer program. Used to analyze DNA, RNA and protein sequence data."
-authors = [
-    {name = "Walla-42",email = "walla42.businessmail@gmail.com"}
-]
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "biopython (>=1.85,<2.0)",
-    "pandas (>=2.3.1,<3.0.0)",
-    "numpy (>=2.3.2,<3.0.0)",
-    "matplotlib (>=3.10.5,<4.0.0)",
-    "scikit-learn (>=1.7.1,<2.0.0)",
-    "argparse (>=1.4.0,<2.0.0)"
-]
-
 [tool.poetry]
+name = "geneanalyzertool"
+version = "1.0.0"
+description = "Bioinformatics command line tool created to extend the original GeneAnalyzer program. Used to analyze DNA, RNA, and protein sequence data."
+authors = ["Walla-42 <walla42.businessmail@gmail.com>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/Walla-42/GenomeAnalyzer2"
+repository = "https://github.com/Walla-42/GenomeAnalyzer2"
+keywords = ["bioinformatics", "genomics", "DNA", "RNA", "protein", "sequence analysis"]
+packages = [
+    { include = "geneanalyzertool", from = "src" }
+]
 
-[tool.poetry.scripts]
-geneanalyzer2 = "geneanalyzertool.client.main:main"
+[tool.poetry.dependencies]
+python = ">=3.12"
+biopython = ">=1.85,<2.0"
+pandas = ">=2.3.1,<3.0.0"
+numpy = ">=2.3.2,<3.0.0"
+matplotlib = ">=3.10.5,<4.0.0"
+scikit-learn = ">=1.7.1,<2.0.0"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.dev-dependencies]
 pytest = "^8.4.1"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.poetry.scripts]
+geneanalyzer2 = "geneanalyzertool.client.main:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
