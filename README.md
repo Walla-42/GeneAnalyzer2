@@ -30,7 +30,7 @@ GeneAnalyzer2 is managed with [Poetry](https://python-poetry.org/). You must hav
 
 1. **Clone the repository:**
 	```sh
-	git clone <your-repo-url>
+	git clone http://github.com/Walla-42/GeneAnalyzer2
 	cd GeneAnalyzer2
 	```
 
