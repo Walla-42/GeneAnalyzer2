@@ -1,5 +1,6 @@
 from Bio import SeqIO
 
+
 class FileHandler:
     """Handles file operations for GeneAnalyzer2 tool."""
 
@@ -53,7 +54,7 @@ class FileHandler:
                 if 0 <= index < len(keys):
                     record_id = keys[index]
                     seq = sequences[record_id]
-                    
+
                     print(f"ID: {record_id}")
                     print(f"Length: {len(seq)}")
                     return {record_id: seq}, [record_id]

@@ -45,10 +45,10 @@ def test_base_count_rna(analyzer):
 
 # ---------- translate ----------
 def test_translate_valid(analyzer):
-    seq = RNA("AUGUUUUAA")  
+    seq = RNA("AUGUUUUAA")
     protein = analyzer._translate(seq)
     assert isinstance(protein, Protein)
-    assert protein == "MF*" 
+    assert protein == "MF*"
 
 
 def test_translate_invalid_type(analyzer):
@@ -114,7 +114,6 @@ def test_analyze_dispatch_calls_gc_percent(analyzer):
             result = analyzer.analyze(seq, analysis)
             expected = getattr(analyzer, f"_{analysis}")(seq)
             assert result == expected
-    
 
 
 def test_analyze_invalid_method(analyzer):
