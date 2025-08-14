@@ -10,6 +10,8 @@
 
 GeneAnalyzer2 is a command-line bioinformatics tool for analyzing DNA, RNA, and protein sequences. It supports a variety of analyses, including GC content, base counting, transcription, translation, and reverse complement calculation. The tool can process both raw sequence strings and multi-sequence FASTA files.
 
+This program replaces the original GeneAnalyzer interactive command line program which can be found <a href="http://github.com/walla-42/GeneAnalyzer">here</a>.
+
 ---
 
 ## Features
