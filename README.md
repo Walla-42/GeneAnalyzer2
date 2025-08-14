@@ -24,27 +24,26 @@ This program replaces the original GeneAnalyzer interactive command line program
 
 ---
 
-## Installation
 
-GeneAnalyzer2 is managed with [Poetry](https://python-poetry.org/). You must have Poetry and Python 3.8+ installed.
 
-1. **Clone the repository:**
-	```sh
-	git clone http://github.com/Walla-42/GeneAnalyzer2
-	cd GeneAnalyzer2
-	```
+## Install directly from GitHub
+```sh
+    pip install git+https://github.com/Walla-42/GeneAnalyzer2.git
+```
 
-2. **Install dependencies:**
-	```sh
-	poetry install
-	```
+## Development Setup
+If you would like to work on the source code:
+```sh
+    git clone https://github.com/Walla-42/GeneAnalyzer2.git
+    cd GenomeAnalyzer2
+    poetry install
+    poetry run pytest
+```
+You can then run the CLI directly from source:
 
-3. **(Optional) Activate the Poetry shell:**
-	```sh
-	poetry shell
-	```
-
----
+```sh
+    poetry run geneanalyzer2 --help
+```
 
 ## Usage
 
