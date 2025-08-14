@@ -20,7 +20,7 @@ numpy = ">=2.3.2,<3.0.0"
 matplotlib = ">=3.10.5,<4.0.0"
 scikit-learn = ">=1.7.1,<2.0.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
 
 [tool.pytest.ini_options]

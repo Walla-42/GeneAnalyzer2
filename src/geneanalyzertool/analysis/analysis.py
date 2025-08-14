@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, override
-from geneanalyzertool.core.sequences import *
+from typing import Any
+from geneanalyzertool.core.sequences import Sequence
+
 
 class Analysis(ABC):
     """

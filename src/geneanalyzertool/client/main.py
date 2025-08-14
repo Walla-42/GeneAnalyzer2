@@ -1,18 +1,19 @@
 import argparse
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
-from geneanalyzertool.core.sequences import DNA, RNA, Protein, Sequence
-from geneanalyzertool.analysis.analysis import Analysis
+from geneanalyzertool.core.sequences import DNA, RNA, Protein
 from geneanalyzertool.core.file_handler import FileHandler
 
-# if a class is added to this map, --mode in parse_args() must also be updated. 
+# if a class is added to this map, --mode in parse_args() must also be updated.
 analysis_map = {
     "basic": BasicSequenceAnalysis
 }
 
 analysis_options = {
     "basic": ['gc_percent', 'base_count', 'translate', 'transcribe', 'reverse_complement']
-    }
+}
 
+
+# if a new analysis is added to analysis_options, it must also be added to the map above.
 def parse_args():
     parser = argparse.ArgumentParser(
         prog='GeneAnalyzer2',
@@ -41,7 +42,7 @@ def parse_args():
     # analysis args
     parser.add_argument(
         '--mode', '-m',
-        choices=['basic'], 
+        choices=['basic'],
         default='basic',
         help='Mode of analysis to be performed. Default is basic. Refer to docs for more information.'
     )
@@ -51,7 +52,7 @@ def parse_args():
         required=True,
         help='Type of analysis to perform. Based on mode chosen.'
     )
-    
+
     # output file args
     parser.add_argument(
         '--out', '-o',
@@ -59,6 +60,7 @@ def parse_args():
         help='Optional: Path to save analysis results. If omitted, results are printed to stdout.'
     )
     return parser.parse_args()
+
 
 def main():
     args = parse_args()

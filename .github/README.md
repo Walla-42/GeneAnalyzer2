@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/walla-42/GeneAnalyzer2">
-    <img src="images/GeneAnalyzer2Logo.png" alt="Logo">
+    <img src="/docs/images/GeneAnalyzer2Logo.png" alt="Logo">
   </a>
 </div>
 
@@ -32,18 +32,7 @@ This program replaces the original GeneAnalyzer interactive command line program
 ```
 
 ## Development Setup
-If you would like to work on the source code:
-```sh
-    git clone https://github.com/Walla-42/GeneAnalyzer2.git
-    cd GenomeAnalyzer2
-    poetry install
-    poetry run pytest
-```
-You can then run the CLI directly from source:
-
-```sh
-    poetry run geneanalyzer2 --help
-```
+If you would like to work on this project, view how to contribute <a href="/.github/CONTRIBUTING.md">here</a>.
 
 ## Usage
 
@@ -62,7 +51,7 @@ You can run GeneAnalyzer2 using Poetry's script entry point or directly with Pyt
 
 ## Examples
 
-### 1. Analyze a Raw DNA Sequence (GC Content)
+### 1. Analyze a Raw DNA Sequence
 
 ```sh
 poetry run geneanalyzer2 --type DNA --analysis gc_percent "ATGCGTACGTAGCTAGCTAGGCTAGCTAGCTGACTGACTGATCGATCGTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGC"
@@ -74,7 +63,7 @@ poetry run geneanalyzer2 --type DNA --analysis gc_percent "ATGCGTACGTAGCTAGCTAGG
 poetry run geneanalyzer2 --type DNA --analysis transcribe "ATGCGTACGTAGCTAGCTAGGCTAGCTAGCTGACTGACTGATCGATCGTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGC"
 ```
 
-### 3. Analyze All Sequences in a FASTA File (Base Count)
+### 3. Analyze All Sequences in a FASTA File
 
 ```sh
 poetry run geneanalyzer2 --file test_sequences.fasta --type DNA --analysis base_count
