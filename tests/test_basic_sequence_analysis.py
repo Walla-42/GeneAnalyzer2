@@ -12,14 +12,14 @@ def analyzer():
 def test_gc_percent_dna(analyzer):
     seq = DNA("ATGCGC")
     result = analyzer._gc_percent(seq)
-    expected = (seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100
+    expected = round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)
     assert result == expected
 
 
 def test_gc_percent_rna(analyzer):
     seq = RNA("AUGCGC")
     result = analyzer._gc_percent(seq)
-    expected = (seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100
+    expected = round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)
     assert result == expected
 
 
