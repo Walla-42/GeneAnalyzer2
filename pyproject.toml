@@ -3,7 +3,7 @@ name = "geneanalyzertool"
 version = "1.0.0"
 description = "Bioinformatics command line tool created to extend the original GeneAnalyzer program. Used to analyze DNA, RNA, and protein sequence data."
 authors = ["Walla-42 <walla42.businessmail@gmail.com>"]
-readme = "README.md"
+readme = ".github/README.md"
 license = "MIT"
 homepage = "https://github.com/Walla-42/GenomeAnalyzer2"
 repository = "https://github.com/Walla-42/GenomeAnalyzer2"
@@ -28,7 +28,7 @@ pythonpath = ["src"]
 
 [tool.poetry.scripts]
 geneanalyzer2 = "geneanalyzertool.client.main:main"
-install-hooks = "scripts.dev_setup:main"
+setup-dev = "scripts.dev_setup:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

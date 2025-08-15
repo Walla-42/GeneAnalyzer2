@@ -1,4 +1,5 @@
-# <type>(<scope>): <short summary>
+<type>(<scope>): <short summary>
+
 # 
 # Types:
 #   feat     – a new feature
