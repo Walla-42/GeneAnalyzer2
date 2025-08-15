@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Regex 
+pattern='^(feat|fix|docs|style|refactor|perf|test|chore|build|ci)(\([a-z0-9_-]+\))?: .{1,72}$'
+
+msg_file="$1"
+msg=$(head -n1 "$msg_file")
+
+if ! echo "$msg" | grep -Eq "$pattern"; then
+  echo "ERROR: Commit message does not follow Conventional Commits format."
+  echo "Example: feat(api): add CSV export endpoint"
+  exit 1
+fi

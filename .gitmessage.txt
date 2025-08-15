@@ -1,0 +1,24 @@
+# <type>(<scope>): <short summary>
+# 
+# Types:
+#   feat     – a new feature
+#   fix      – a bug fix
+#   docs     – documentation only changes
+#   style    – formatting changes (no code logic)
+#   refactor – code restructuring without behavior change
+#   perf     – performance improvement
+#   test     – adding/updating tests
+#   chore    – maintenance, build, tooling
+#   build    – changes to build system/dependencies
+#   ci       – CI/CD config changes
+#
+# Example: feat(api): add CSV export endpoint
+#
+# Summary should be in lowercase, <=72 chars, and in past tense.
+#
+# Body (optional):
+#   Explain the "what" and "why", not the "how".
+#   Wrap at 72 characters per line.
+#
+# Footer (optional):
+#   Reference issues/tickets. Example: closes #123

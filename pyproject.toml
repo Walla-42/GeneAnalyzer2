@@ -28,6 +28,7 @@ pythonpath = ["src"]
 
 [tool.poetry.scripts]
 geneanalyzer2 = "geneanalyzertool.client.main:main"
+install-hooks = "scripts.dev_setup:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
