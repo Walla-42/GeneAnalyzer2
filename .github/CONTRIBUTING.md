@@ -33,6 +33,7 @@ pip install poetry
 4. ***Install dependencies***
 ```sh
 poetry install
+poetry run setup-dev
 ```
 
 5. ***Activate the poetry virtual environment***
@@ -69,6 +70,38 @@ Please do the following, it will make your code easier to read:
 - Document all of your public methods and classes with docstrings
 - If the method is not clear, add a docstring, even for private methods
 - Always use type hints in your method signatures. This makes it easier to follow what your code is doing
+
+### Commit style enforcement:
+All commit messages are checked before a commit can be made. They must follow the following format:
+```sh
+<type>(<scope>): <short summary>
+```
+
+#### Types:
+- feat     – a new feature
+- fix      – a bug fix
+- docs     – documentation only changes
+- style    – formatting changes (no code logic)
+- refactor – code restructuring without behavior change
+- perf     – performance improvement
+- test     – adding/updating tests
+- chore    – maintenance, build, tooling
+- build    – changes to build system/dependencies
+- ci       – CI/CD config changes
+
+#### Example: 
+```sh
+ git commit -am "feat(api): added CSV export endpoint"
+``` 
+
+Summary should be in lowercase, <=72 chars, and in past tense.
+
+#### Body (optional):
+   Explain the "what" and "why", not the "how".
+   Wrap at 72 characters per line.
+
+#### Footer (optional):
+   Reference issues/tickets. Example: closes #123
 
 ## Testing
 All new code must have test, both positive and negative for all public meethods. 
