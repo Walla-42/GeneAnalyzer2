@@ -1,0 +1,3 @@
+scripts/* merge=ours
+.githooks/* merge=ours
+.gitmessage.txt merge=ours
