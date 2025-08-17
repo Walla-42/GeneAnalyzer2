@@ -61,7 +61,8 @@ git checkout -b feature/your-new-feature
 git fetch upstream
 git pull upstream/development
 ```
-Do not pull from main; all development should branch off of development
+Do not pull from master; all development should branch off of development
+
 4. **Commit often**
 For commit rules see [Coding Standards](#coding-standards).
 
