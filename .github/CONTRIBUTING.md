@@ -18,27 +18,32 @@ Improvements, bug fixes, and new features are welcome, but we ask that all chang
 
 1. **Fork the Repository**
     - Create your own fork of the project to work on
-2. **Clone your fork**
+
+2. **Clone your fork and work from the development branch**
 ```sh
 git clone https://github.com/<your username>/GeneAnalyzer2.git
+cd GeneAnalyzer2
+git checkout development
 ```
+> **Note:** Always work from the `development` branch, not `master`. All new features and fixes should branch off of `development`.
+
 3. **Add the original repository as an upstream remote**
 ```sh
 git remote add upstream https://github.com/Walla-42/GeneAnalyzer2.git
 git fetch upstream
 ```
-This allows you to pull updates from the main project into your fork
+This allows you to pull updates from the main project into your fork.
 
 4. **Install poetry**
 ```sh
 pip install poetry
 ```
-5. **Install dependancies and setup the dev environment**
+5. **Install dependencies and set up the dev environment**
 ```sh
 poetry install
 poetry run setup-dev
 ```
-This sets up all project dependencies, code checkers, commit hooks and other development tools
+This sets up all project dependencies, code checkers, commit hooks, and other development tools.
 
 6. **Activate the Poetry virtual environment**
 ```sh
@@ -48,13 +53,15 @@ poetry shell
 ## Development Workflow
 
 1. **Start from the development branch**
+    Make sure you are on the latest `development` branch before starting any new work:
 ```sh
 git fetch upstream
-git checkout -b development-updates upstream/development
+git checkout development
+git pull upstream development
 ```
 2. **Create a new branch for each feature or fix**
 ```sh
-git checkout -b feature/your-new-feature
+git checkout -b feature/your-new-feature development
 ```
 3. **Keep your branch up to date with development**
 ```sh
@@ -72,7 +79,7 @@ git push origin feature/your-feature
 ```
 6. **Open a pull request when your feature is complete**
 
-Open a PR from your fork's feature breanch into the main repo's development branch. Once it has been reviewed and passes all the code checks your code will be added to the development branch and released with the next project release. 
+Open a PR from your fork's feature branch into the main repo's **development** branch. Once it has been reviewed and passes all the code checks your code will be added to the development branch and released with the next project release. 
 
 ## Coding Standards
 This project follows the PEP8 guidelines. This is enforced with some minor configurations using flake8 for linting and formatting checks. 
