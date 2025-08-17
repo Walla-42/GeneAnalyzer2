@@ -10,5 +10,5 @@ class Analysis(ABC):
     """
 
     @abstractmethod
-    def analyze(self, sequence: Sequence) -> Any:
+    def analyze(self, sequence: Sequence, method: str) -> Any:
         raise NotImplementedError("Subclasses must implement this method.")
