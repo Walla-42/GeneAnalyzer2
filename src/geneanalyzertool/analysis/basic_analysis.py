@@ -2,12 +2,19 @@ from geneanalyzertool.analysis.analysis import Analysis
 from geneanalyzertool.core.sequences import Sequence, DNA, RNA, Protein
 from geneanalyzertool.core.file_handler import FileHandler
 from typing import Any, override, List
+from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
 
 
-class BasicSequenceAnalysis(Analysis):
+class BasicSequenceAnalysis(Analysis, FileHandler):
     """
     Class for basic analysis performed on dna, rna or protein sequences
     """
+
+    @override
+    def export_to_file(self, results: List[str], out_file: str):
+        with open(out_file, 'w') as out:
+            for line in results:
+                out.write(line + "\n")
 
     def process_sequences(self, sequence_input: str, is_file: bool, seq_type: str, analysis_method: str) -> List[str]:
         """
@@ -25,27 +32,30 @@ class BasicSequenceAnalysis(Analysis):
 
         # Get sequences to analyze
         if is_file:
-            filehandler = FileHandler()
-            available_sequences, sequence_keys = filehandler.read_in_sequence(sequence_input)
+            available_sequences, sequence_keys = self.select_sequences(sequence_input)
         else:
             # Treat the single sequence as a dict with one entry
             available_sequences = {"input_sequence": sequence_input}
             sequence_keys = ["input_sequence"]
 
-        # Map sequence type to the appropriate class
-        type_map = {"DNA": DNA, "RNA": RNA, "Protein": Protein}
-        seq_type = type_map[seq_type]
+        try:
+            # Map sequence type to the appropriate class
+            type_map = {"DNA": DNA, "RNA": RNA, "PROTEIN": Protein}
+            seq_type_class = type_map[seq_type.upper()]
+        
+        except KeyError:
+            raise InvalidSequenceTypeError("Error: Invalid sequence type provided. Valid types are DNA, RNA, or Protein.")
 
         # Process each sequence
         results = []
         for key in sequence_keys:
             print(f"Analyzing {key}...")
-            sequence_obj = seq_type(available_sequences[key])
+            sequence_obj = seq_type_class(available_sequences[key])
             try:
                 result = self.analyze(sequence_obj, analysis_method)
                 results.append(f"{key}: {result}")
-            except Exception as e:
-                print(f"Error: Analysis interrupted - {e}")
+            except ValueError as e:
+                raise AnalysisMethodError(f"Invalid analysis method provided. {str(e)}")
 
         return results
 
@@ -63,7 +73,7 @@ class BasicSequenceAnalysis(Analysis):
         }
 
         if method not in method_dispatch:
-            raise ValueError(f"Uknown mehtod {method}")
+            raise ValueError(f"Unknown method {method}")
 
         return method_dispatch[method](sequence)
 
@@ -95,7 +105,7 @@ class BasicSequenceAnalysis(Analysis):
     def _translate(self, sequence) -> Protein:
         """
         Translates a given RNA sequence into a predicted protein sequence minus
-        post tranlational modificaitons. Sequnce provided must be of type RNA.
+        post translational modifications. Sequence provided must be of type RNA.
         """
         peptide_table = {
             "UUU": "F", "UUC": "F", "UUA": "L", "UUG": "L",

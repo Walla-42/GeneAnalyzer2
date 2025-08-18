@@ -1,5 +1,6 @@
 import argparse
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
+from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
 
 # if a class is added to this map, --mode in parse_args() must also be updated.
 analysis_map = {
@@ -84,15 +85,16 @@ def main():
 
         # Output results
         if args.out:
-            with open(args.out, 'w') as out_file:
-                for line in results:
-                    out_file.write(line + "\n")
+            analyzer.export_to_file(results, args.out)
         else:
             for line in results:
                 print(line)
 
-    except Exception as e:
-        print(f"Error: Analysis interrupted - {e}")
+    except InvalidSequenceTypeError as e:
+        print(str(e))
+        exit(1)
+    except AnalysisMethodError as e:
+        print(str(e))
         exit(1)
 
 

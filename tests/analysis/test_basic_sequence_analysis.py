@@ -107,7 +107,7 @@ def test_analyze_dispatch_calls_gc_percent(analyzer):
             else:
                 raise TypeError("Unrecognized anlysis type")
         except TypeError as e:
-            pytest.fail(e)
+            pytest.fail(str(e))
 
         for analysis in analysis_type:
             seq = sequence_type("ATGC")
