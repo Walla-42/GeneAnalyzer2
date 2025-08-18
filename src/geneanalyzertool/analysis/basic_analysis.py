@@ -2,7 +2,7 @@ from geneanalyzertool.analysis.analysis import Analysis
 from geneanalyzertool.core.sequences import Sequence, DNA, RNA, Protein
 from geneanalyzertool.core.file_handler import FileHandler
 from typing import Any, override, List
-from geneanalyzertool.core.exceptions import InvalidSequenceTypeError
+from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
 
 
 class BasicSequenceAnalysis(Analysis, FileHandler):
@@ -32,8 +32,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
         # Get sequences to analyze
         if is_file:
-            filehandler = FileHandler()
-            available_sequences, sequence_keys = filehandler.select_sequences(sequence_input)
+            available_sequences, sequence_keys = self.select_sequences(sequence_input)
         else:
             # Treat the single sequence as a dict with one entry
             available_sequences = {"input_sequence": sequence_input}
@@ -43,7 +42,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             # Map sequence type to the appropriate class
             type_map = {"DNA": DNA, "RNA": RNA, "PROTEIN": Protein}
             seq_type_class = type_map[seq_type.upper()]
-
+        
         except KeyError:
             raise InvalidSequenceTypeError("Error: Invalid sequence type provided. Valid types are DNA, RNA, or Protein.")
 
@@ -55,8 +54,8 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             try:
                 result = self.analyze(sequence_obj, analysis_method)
                 results.append(f"{key}: {result}")
-            except Exception as e:
-                print(f"Error: Analysis interrupted - {e}")
+            except ValueError as e:
+                raise AnalysisMethodError(f"Invalid analysis method provided. {str(e)}")
 
         return results
 
@@ -74,7 +73,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
         }
 
         if method not in method_dispatch:
-            raise ValueError(f"Uknown mehtod {method}")
+            raise ValueError(f"Unknown method {method}")
 
         return method_dispatch[method](sequence)
 
@@ -106,7 +105,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
     def _translate(self, sequence) -> Protein:
         """
         Translates a given RNA sequence into a predicted protein sequence minus
-        post tranlational modificaitons. Sequnce provided must be of type RNA.
+        post tranlational modificaitons. Sequence provided must be of type RNA.
         """
         peptide_table = {
             "UUU": "F", "UUC": "F", "UUA": "L", "UUG": "L",
