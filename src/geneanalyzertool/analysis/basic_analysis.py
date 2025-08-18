@@ -56,6 +56,8 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
                 results.append(f"{key}: {result}")
             except ValueError as e:
                 raise AnalysisMethodError(f"Invalid analysis method provided. {str(e)}")
+            except TypeError as e:
+                raise InvalidSequenceTypeError(f"Unable to perform this analysis on sequence of type {seq_type.upper()}. {e}")
 
         return results
 

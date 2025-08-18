@@ -1,6 +1,7 @@
 import pytest
 from geneanalyzertool.core.sequences import DNA, RNA, Protein
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
+from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
 
 
 @pytest.fixture
@@ -137,17 +138,17 @@ def test_process_sequences_single_sequence(analyzer):
 
 
 def test_process_sequences_invalid_analysis_method(analyzer, capsys):
-    results = analyzer.process_sequences(
-        sequence_input="ATGC",
-        is_file=False,
-        seq_type="DNA",
-        analysis_method="invalid_method"
-    )
+    with pytest.raises(AnalysisMethodError):
+        results = analyzer.process_sequences(
+            sequence_input="ATGC",
+            is_file=False,
+            seq_type="DNA",
+            analysis_method="invalid_method"
+        )
 
-    # process_sequences should handle the error internally and return no results
-    assert results == []
-    captured = capsys.readouterr()
-    assert "Error: Analysis interrupted" in captured.out
+        # process_sequences should handle the error internally and return no results
+        assert results == []
+    
 
 
 def test_process_sequences_rna_translation(analyzer):
@@ -164,13 +165,12 @@ def test_process_sequences_rna_translation(analyzer):
 
 
 def test_process_sequences_type_mismatch(analyzer, capsys):
-    results = analyzer.process_sequences(
-        sequence_input="ATGC",
-        is_file=False,
-        seq_type="DNA",
-        analysis_method="translate"
-    )
+    with pytest.raises(InvalidSequenceTypeError):
+        results = analyzer.process_sequences(
+            sequence_input="ATGC",
+            is_file=False,
+            seq_type="DNA",
+            analysis_method="translate"
+        )
 
-    assert results == []
-    captured = capsys.readouterr()
-    assert "Sequence must be of type RNA" in captured.out
+        assert results == []
