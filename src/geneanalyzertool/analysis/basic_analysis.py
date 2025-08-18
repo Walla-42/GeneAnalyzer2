@@ -2,13 +2,19 @@ from geneanalyzertool.analysis.analysis import Analysis
 from geneanalyzertool.core.sequences import Sequence, DNA, RNA, Protein
 from geneanalyzertool.core.file_handler import FileHandler
 from typing import Any, override, List
-from geneanalyzertool.core.exceptions import *
+from geneanalyzertool.core.exceptions import InvalidSequenceTypeError
 
 
-class BasicSequenceAnalysis(Analysis):
+class BasicSequenceAnalysis(Analysis, FileHandler):
     """
     Class for basic analysis performed on dna, rna or protein sequences
     """
+
+    @override
+    def export_to_file(self, results: List[str], out_file: str):
+        with open(out_file, 'w') as out:
+            for line in results:
+                out.write(line + "\n")
 
     def process_sequences(self, sequence_input: str, is_file: bool, seq_type: str, analysis_method: str) -> List[str]:
         """
@@ -37,10 +43,9 @@ class BasicSequenceAnalysis(Analysis):
             # Map sequence type to the appropriate class
             type_map = {"DNA": DNA, "RNA": RNA, "PROTEIN": Protein}
             seq_type_class = type_map[seq_type.upper()]
-            
-        except KeyError as e:
-            print("Error: Invalid sequence type provided. Valid types are DNA, RNA, or Protein.")
-            exit(1)
+
+        except KeyError:
+            raise InvalidSequenceTypeError("Error: Invalid sequence type provided. Valid types are DNA, RNA, or Protein.")
 
         # Process each sequence
         results = []

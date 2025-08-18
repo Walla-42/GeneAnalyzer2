@@ -1,11 +1,15 @@
 from Bio import SeqIO
+from typing import List
 
 
-class FileHandler:
+class FileHandler():
     """Handles file operations for GeneAnalyzer2 tool."""
 
     def __init__(self):
         pass
+
+    def export_to_file(self, results: List[str], out_file: str):
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def file_support_check(self, file: str) -> bool:
         """Check if the file has a supported extension (.fna or .fasta)."""
@@ -61,4 +65,4 @@ class FileHandler:
 
             print('\033[1;31mInvalid selection. Please try again.\033[0m')
 
-        raise ValueError("Maximum attempts exceeded. No valid sequences selected.")
+        raise ValueError("Error: Maximum attempts exceeded. No valid sequences selected.")
