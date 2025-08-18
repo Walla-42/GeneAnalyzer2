@@ -120,3 +120,57 @@ def test_analyze_invalid_method(analyzer):
     seq = DNA("ATGC")
     with pytest.raises(ValueError):
         analyzer.analyze(seq, "nonExistentMethod")
+
+
+# ---------- process_sequences ----------
+def test_process_sequences_single_sequence(analyzer):
+    results = analyzer.process_sequences(
+        sequence_input="ATGCATGC",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="gc_percent"
+    )
+
+    assert len(results) == 1
+    assert results[0].startswith("input_sequence:")
+    assert "50.0" in results[0]
+
+
+def test_process_sequences_invalid_analysis_method(analyzer, capsys):
+    results = analyzer.process_sequences(
+        sequence_input="ATGC",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="invalid_method"
+    )
+
+    # process_sequences should handle the error internally and return no results
+    assert results == []
+    captured = capsys.readouterr()
+    assert "Error: Analysis interrupted" in captured.out
+
+
+def test_process_sequences_rna_translation(analyzer):
+    results = analyzer.process_sequences(
+        sequence_input="AUGUUUUAA",
+        is_file=False,
+        seq_type="RNA",
+        analysis_method="translate"
+    )
+
+    assert len(results) == 1
+    assert results[0].startswith("input_sequence:")
+    assert "MF*" in results[0]
+
+
+def test_process_sequences_type_mismatch(analyzer, capsys):
+    results = analyzer.process_sequences(
+        sequence_input="ATGC",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="translate"
+    )
+
+    assert results == []
+    captured = capsys.readouterr()
+    assert "Sequence must be of type RNA" in captured.out

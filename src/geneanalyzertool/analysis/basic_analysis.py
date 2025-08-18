@@ -1,13 +1,53 @@
 from geneanalyzertool.analysis.analysis import Analysis
 from geneanalyzertool.core.sequences import Sequence, DNA, RNA, Protein
-from typing import Any, override
+from geneanalyzertool.core.file_handler import FileHandler
+from typing import Any, override, List
 
 
 class BasicSequenceAnalysis(Analysis):
     """
     Class for basic analysis performed on dna, rna or protein sequences
-
     """
+
+    def process_sequences(self, sequence_input: str, is_file: bool, seq_type: str, analysis_method: str) -> List[str]:
+        """
+        Process one or more sequences and perform the specified analysis.
+
+        Args:
+            sequence_input: Either a sequence string or file path
+            is_file: Whether sequence_input is a file path
+            seq_type: Type of sequence (DNA, RNA, or Protein)
+            analysis_method: Analysis method to perform
+
+        Returns:
+            List of result strings
+        """
+
+        # Get sequences to analyze
+        if is_file:
+            filehandler = FileHandler()
+            available_sequences, sequence_keys = filehandler.read_in_sequence(sequence_input)
+        else:
+            # Treat the single sequence as a dict with one entry
+            available_sequences = {"input_sequence": sequence_input}
+            sequence_keys = ["input_sequence"]
+
+        # Map sequence type to the appropriate class
+        type_map = {"DNA": DNA, "RNA": RNA, "Protein": Protein}
+        seq_type = type_map[seq_type]
+
+        # Process each sequence
+        results = []
+        for key in sequence_keys:
+            print(f"Analyzing {key}...")
+            sequence_obj = seq_type(available_sequences[key])
+            try:
+                result = self.analyze(sequence_obj, analysis_method)
+                results.append(f"{key}: {result}")
+            except Exception as e:
+                print(f"Error: Analysis interrupted - {e}")
+
+        return results
 
     @override
     def analyze(self, sequence: Sequence, method: str) -> Any:
