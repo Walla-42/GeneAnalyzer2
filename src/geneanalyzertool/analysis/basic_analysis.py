@@ -2,6 +2,7 @@ from geneanalyzertool.analysis.analysis import Analysis
 from geneanalyzertool.core.sequences import Sequence, DNA, RNA, Protein
 from geneanalyzertool.core.file_handler import FileHandler
 from typing import Any, override, List
+from geneanalyzertool.core.exceptions import *
 
 
 class BasicSequenceAnalysis(Analysis):
@@ -26,21 +27,26 @@ class BasicSequenceAnalysis(Analysis):
         # Get sequences to analyze
         if is_file:
             filehandler = FileHandler()
-            available_sequences, sequence_keys = filehandler.read_in_sequence(sequence_input)
+            available_sequences, sequence_keys = filehandler.select_sequences(sequence_input)
         else:
             # Treat the single sequence as a dict with one entry
             available_sequences = {"input_sequence": sequence_input}
             sequence_keys = ["input_sequence"]
 
-        # Map sequence type to the appropriate class
-        type_map = {"DNA": DNA, "RNA": RNA, "Protein": Protein}
-        seq_type = type_map[seq_type]
+        try:
+            # Map sequence type to the appropriate class
+            type_map = {"DNA": DNA, "RNA": RNA, "PROTEIN": Protein}
+            seq_type_class = type_map[seq_type.upper()]
+            
+        except KeyError as e:
+            print("Error: Invalid sequence type provided. Valid types are DNA, RNA, or Protein.")
+            exit(1)
 
         # Process each sequence
         results = []
         for key in sequence_keys:
             print(f"Analyzing {key}...")
-            sequence_obj = seq_type(available_sequences[key])
+            sequence_obj = seq_type_class(available_sequences[key])
             try:
                 result = self.analyze(sequence_obj, analysis_method)
                 results.append(f"{key}: {result}")
