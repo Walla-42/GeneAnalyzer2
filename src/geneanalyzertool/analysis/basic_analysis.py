@@ -105,7 +105,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
     def _translate(self, sequence) -> Protein:
         """
         Translates a given RNA sequence into a predicted protein sequence minus
-        post tranlational modificaitons. Sequence provided must be of type RNA.
+        post translational modifications. Sequence provided must be of type RNA.
         """
         peptide_table = {
             "UUU": "F", "UUC": "F", "UUA": "L", "UUG": "L",
