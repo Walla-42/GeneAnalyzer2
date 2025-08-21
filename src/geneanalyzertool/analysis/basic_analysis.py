@@ -242,7 +242,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
         ORFS = {}
         ORF_count = 0
         for i in range(0, len(sequence)):
-            codon = sequence[i:i + 3]
+            codon = sequence[i:i + 3].upper()
             if codon not in start_codons:
                 continue
             for j in range(i, len(sequence), 3):
