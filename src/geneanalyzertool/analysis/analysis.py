@@ -18,5 +18,5 @@ class Analysis(ABC):
         raise NotImplementedError("Subclasses must implement this method.")
 
     @abstractmethod
-    def print_to_terminal(self, results:dict, sequence_keys:List[str]): 
+    def print_to_terminal(self, results: dict, sequence_keys: List[str]):
         raise NotImplementedError("Subclasses must implement this method.")

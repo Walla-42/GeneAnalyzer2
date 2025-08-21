@@ -136,6 +136,7 @@ def test_process_sequences_single_sequence(analyzer):
     assert sequence_keys[0] == "input_sequence"
     assert test_results[sequence_keys[0]] == 50.0
 
+
 def test_process_sequences_invalid_analysis_method(analyzer):
     with pytest.raises(AnalysisMethodError):
         results = analyzer.process_sequences(
@@ -147,7 +148,6 @@ def test_process_sequences_invalid_analysis_method(analyzer):
 
         # process_sequences should handle the error internally and return no results
         assert results == []
-    
 
 
 def test_process_sequences_rna_translation(analyzer):
@@ -165,7 +165,7 @@ def test_process_sequences_rna_translation(analyzer):
 
 def test_process_sequences_type_mismatch(analyzer):
     with pytest.raises(InvalidSequenceTypeError):
-            analyzer.process_sequences(
+        analyzer.process_sequences(
             sequence_input="ATGC",
             is_file=False,
             seq_type="DNA",
@@ -175,9 +175,9 @@ def test_process_sequences_type_mismatch(analyzer):
 
 # ---------- ORF Finder ----------
 
-def test_orf_finder_simple_seqeunce(analyzer):
+def test_orf_finder_simple_sequence(analyzer):
     results = analyzer.process_sequences(
-        sequence_input = "ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG",
+        sequence_input="ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG",
         is_file=False,
         seq_type="DNA",
         analysis_method="orf"
@@ -197,9 +197,9 @@ def test_orf_finder_simple_seqeunce(analyzer):
     }
 
 
-def test_orf_finder_complex_seqeunce(analyzer):
+def test_orf_finder_complex_sequence(analyzer):
     results = analyzer.process_sequences(
-        sequence_input = "ATGAAATGAATGTAGATGCCCTAA",
+        sequence_input="ATGAAATGAATGTAGATGCCCTAA",
         is_file=False,
         seq_type="DNA",
         analysis_method="orf"
@@ -213,7 +213,7 @@ def test_orf_finder_complex_seqeunce(analyzer):
                                 "Start": 0,
                                 "End": 8,
                                 "Length": 9
-                            }, 
+                            },
                             "ORF_2": {
                                 "Sequence": "ATGTAG",
                                 "Start": 9,
@@ -229,13 +229,13 @@ def test_orf_finder_complex_seqeunce(analyzer):
                         }
                     }
                 }
-    
+
+
 def test_orf_finder_RNA(analyzer):
     with pytest.raises(InvalidSequenceTypeError):
-            analyzer.process_sequences(
-            sequence_input = "ATGAAATGAATGTAGATGCCCTAA",
+        analyzer.process_sequences(
+            sequence_input="ATGAAATGAATGTAGATGCCCTAA",
             is_file=False,
             seq_type="RNA",
             analysis_method="orf"
         )
-                

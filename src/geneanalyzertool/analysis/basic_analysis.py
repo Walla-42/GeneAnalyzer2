@@ -10,13 +10,14 @@ RED = "\033[1;31m"
 RESET = "\033[0m"
 CYAN = "\033[1;36m"
 
+
 class BasicSequenceAnalysis(Analysis, FileHandler):
     """
-    Class for basic analysis performed on dna, rna or protein sequences. This class holds all the basic mode functionality. 
+    Class for basic analysis performed on dna, rna or protein sequences. This class holds all the basic mode functionality.
     It extends the Analysis class and implements the FileHandler interface.
-    
-    Note: If you are adding a method to the Basic analysis mode, add your method below and add a call to your method in the analyze method. 
-    Make sure your method is private (pythonic private) by adding an underscore "_" before the method name. 
+
+    Note: If you are adding a method to the Basic analysis mode, add your method below and add a call to your method in the
+    analyze method. Make sure your method is private (pythonic private) by adding an underscore "_" before the method name.
     """
 
     @override
@@ -28,7 +29,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
                 lines.append(f"{orf_name}: {orf_data['Sequence']}")
                 lines.append(f"  Start: {orf_data['Start']} End: {orf_data['End']} Length: {orf_data['Length']}")
             return "\n".join(lines)
-        
+
         with open(out_file, 'w') as out:
             for seq in sequence_keys:
                 value = results[seq]
@@ -44,9 +45,10 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             lines.append(f"{GREEN}Number of ORFs:{RESET} {orf_result['Number of ORFS']}")
             for orf_name, orf_data in orf_result['ORFS'].items():
                 lines.append(f"{GREEN}{orf_name}:{RESET} {orf_data['Sequence']}")
-                lines.append(f"  {CYAN}Start:{RESET} {orf_data['Start']} {CYAN}End:{RESET} {orf_data['End']} {CYAN}Length:{RESET} {orf_data['Length']}")
+                lines.append(f"  {CYAN}Start:{RESET} {orf_data['Start']} {CYAN}End:{RESET} {orf_data['End']}\
+                              {CYAN}Length:{RESET} {orf_data['Length']}")
             return "\n".join(lines)
-        
+
         for seq in sequence_keys:
             value = results[seq]
             if isinstance(value, dict) and 'ORFS' in value:
@@ -62,9 +64,9 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             sequence: Sequence object to analyze
             method: Analysis method to perform
         Returns:
-            Result of analysis 
+            Result of analysis
 
-        Note: If adding a method to the basic analysis options, add it also in the method dispatch below. 
+        Note: If adding a method to the basic analysis options, add it also in the method dispatch below.
         """
         method_dispatch = {
             "gc_percent": self._gc_percent,
@@ -106,7 +108,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             # Map sequence type to the appropriate class
             type_map = {"DNA": DNA, "RNA": RNA, "PROTEIN": Protein}
             seq_type_class = type_map[seq_type.upper()]
-        
+
         except KeyError:
             raise InvalidSequenceTypeError("Error: Invalid sequence type provided. Valid types are DNA, RNA, or Protein.")
 
@@ -221,7 +223,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
     def _orf_finder(self, sequence: DNA):
         if not isinstance(sequence, DNA):
             raise TypeError("Error: Sequence must be of type DNA")
-        
+
         start_codons = ["ATG"]
         stop_codons = ["TAA", "TAG", "TGA"]
         ORFS = {}
@@ -235,7 +237,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
                 if codon in stop_codons:
                     ORF_count += 1
                     orf_name = f"ORF_{ORF_count}"
-                    orf_seq = sequence[i:j+3]  
+                    orf_seq = sequence[i:j+3]
                     ORFS[orf_name] = {
                         "Sequence": orf_seq,
                         "Start": i,
@@ -250,5 +252,3 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             "ORFS": ORFS
         }
         return result
-    
-        

@@ -8,6 +8,7 @@ RED = "\033[1;31m"
 RESET = "\033[0m"
 CYAN = "\033[1;36m"
 
+
 class FileHandler():
     """Handles file operations for GeneAnalyzer2 tool."""
 
@@ -52,9 +53,9 @@ class FileHandler():
             print(f"{CYAN}{idx}.{GREEN} {record_id}{RESET}")
 
         for _ in range(max_attempts):
-            select = selection_func(YELLOW + 
-                'Select a sequence by number, or type "all" for all sequences:\n>>> ' + RESET
-            ).strip().lower()
+            select = selection_func(YELLOW +
+                                    'Select a sequence by number, or type "all" for all sequences:\n>>> ' + RESET
+                                    ).strip().lower()
 
             if select == "all":
                 return sequences, keys
