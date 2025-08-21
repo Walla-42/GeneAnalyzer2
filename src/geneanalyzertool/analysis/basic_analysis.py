@@ -13,14 +13,33 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
     Note: If you are adding a method to the Basic analysis mode, add your method below and add a call to your method in the analyze method. 
     Make sure your method is private (pythonic private) by adding an underscore "_" before the method name. 
     """
+    def format_orf_result(self, seq_name, orf_result):
+            lines = [f"Sequence Name: {seq_name}"]
+            lines.append(f"Number of ORFs: {orf_result['Number of ORFS']}")
+            for orf_name, orf_data in orf_result['ORFS'].items():
+                lines.append(f"{orf_name}: {orf_data['Sequence']}")
+                lines.append(f"  Start: {orf_data['Start']} End: {orf_data['End']} Length: {orf_data['Length']}")
+            return "\n".join(lines)
 
     @override
     def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
         with open(out_file, 'w') as out:
             for seq in sequence_keys:
-                out.write(f"{seq}: {results[seq]}" + "\n")
+                value = results[seq]
+                if isinstance(value, dict) and 'ORFS' in value:
+                    out.write(self.format_orf_result(seq, value) + "\n")
+                else:
+                    out.write(f"{seq}: {value}\n")
 
-    
+    @override
+    def print_to_terminal(self, results: dict, sequence_keys: List[str]):
+        for seq in sequence_keys:
+            value = results[seq]
+            if isinstance(value, dict) and 'ORFS' in value:
+                print(self.format_orf_result(seq, value))
+            else:
+                print(f"{seq}: {value}")
+
     @override
     def analyze(self, sequence: Sequence, method: str) -> Any:
         """

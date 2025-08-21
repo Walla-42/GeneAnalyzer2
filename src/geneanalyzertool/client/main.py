@@ -8,7 +8,7 @@ analysis_map = {
 }
 
 analysis_options = {
-    "basic": ['gc_percent', 'base_count', 'translate', 'transcribe', 'reverse_complement']
+    "basic": ['gc_percent', 'base_count', 'translate', 'transcribe', 'reverse_complement', 'orf']
 }
 
 
@@ -53,7 +53,7 @@ def parse_args():
     )
 
     parser.add_argument(
-        '--min', '-m',
+        '--min',
         help='Minimum number of base pairs. For ORF analysis, this is the minimum ' \
         'number of base pairs returned ORFs must have'
     )
@@ -93,8 +93,7 @@ def main():
         if args.out:
             analyzer.export_to_file(results, sequence_keys, args.out)
         else:
-            for line in results:
-                print(line)
+            analyzer.print_to_terminal(results, sequence_keys)
 
     except InvalidSequenceTypeError as e:
         print(str(e))
