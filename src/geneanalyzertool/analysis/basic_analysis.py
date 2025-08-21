@@ -25,9 +25,16 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
         def format_orf_result(seq_name, orf_result):
             lines = [f"Sequence Name: {seq_name}"]
             lines.append(f"Number of ORFs: {orf_result['Number of ORFS']}")
-            for orf_name, orf_data in orf_result['ORFS'].items():
-                lines.append(f"{orf_name}: {orf_data['Sequence']}")
-                lines.append(f"  Start: {orf_data['Start']} End: {orf_data['End']} Length: {orf_data['Length']}")
+            if orf_result['ORFS'].items():
+                for orf_name, orf_data in orf_result['ORFS'].items():
+                    lines.append(f"{orf_name}: {orf_data['Sequence']}")
+                    lines.append(
+                        f"   Start: {orf_data['Start']}"
+                        f"   End: {orf_data['End']}"
+                        f"   Length: {orf_data['Length']}"
+                    )
+            else:
+                lines.append("No Open Reading Frames Found")
             return "\n".join(lines)
 
         with open(out_file, 'w') as out:
@@ -43,10 +50,16 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
         def format_orf_result(seq_name, orf_result):
             lines = [f"{YELLOW}Sequence Name: {RESET}{seq_name}"]
             lines.append(f"{GREEN}Number of ORFs:{RESET} {orf_result['Number of ORFS']}")
-            for orf_name, orf_data in orf_result['ORFS'].items():
-                lines.append(f"{GREEN}{orf_name}:{RESET} {orf_data['Sequence']}")
-                lines.append(f"  {CYAN}Start:{RESET} {orf_data['Start']} {CYAN}End:{RESET} {orf_data['End']}\
-                              {CYAN}Length:{RESET} {orf_data['Length']}")
+            if orf_result['ORFS'].items():
+                for orf_name, orf_data in orf_result['ORFS'].items():
+                    lines.append(f"{GREEN}{orf_name}:{RESET} {orf_data['Sequence']}")
+                    lines.append(
+                        f"   {CYAN}Start:{RESET} {orf_data['Start']}"
+                        f"   {CYAN}End:{RESET} {orf_data['End']}"
+                        f"   {CYAN}Length:{RESET} {orf_data['Length']}"
+                    )
+            else:
+                lines.append(RED + "No Open Reading Frames Found" + RESET)
             return "\n".join(lines)
 
         for seq in sequence_keys:
@@ -126,7 +139,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
         return results, sequence_keys
 
-    def _gc_percent(self, sequence: DNA | RNA, ) -> str:
+    def _gc_percent(self, sequence: DNA | RNA) -> str:
         """
         Calculates the percent Guanine and Cytosine that are present in a DNA or RNA Molecule.
         Sequence must be of type RNA or DNA.
@@ -245,8 +258,6 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
                         "Length": (j + 3) - i
                     }
                     break
-        if len(ORFS) == 0:
-            ORFS = "No Open Reading Frames"
         result = {
             "Number of ORFS": ORF_count,
             "ORFS": ORFS
