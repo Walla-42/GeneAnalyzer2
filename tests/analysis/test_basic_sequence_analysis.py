@@ -1,6 +1,7 @@
 import pytest
 from geneanalyzertool.core.sequences import DNA, RNA, Protein
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
+from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
 
 
 @pytest.fixture
@@ -12,14 +13,14 @@ def analyzer():
 def test_gc_percent_dna(analyzer):
     seq = DNA("ATGCGC")
     result = analyzer._gc_percent(seq)
-    expected = round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)
+    expected = f"{round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)} %"
     assert result == expected
 
 
 def test_gc_percent_rna(analyzer):
     seq = RNA("AUGCGC")
     result = analyzer._gc_percent(seq)
-    expected = round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)
+    expected = f"{round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)} %"
     assert result == expected
 
 
@@ -107,7 +108,7 @@ def test_analyze_dispatch_calls_gc_percent(analyzer):
             else:
                 raise TypeError("Unrecognized anlysis type")
         except TypeError as e:
-            pytest.fail(e)
+            pytest.fail(str(e))
 
         for analysis in analysis_type:
             seq = sequence_type("ATGC")
@@ -120,3 +121,121 @@ def test_analyze_invalid_method(analyzer):
     seq = DNA("ATGC")
     with pytest.raises(ValueError):
         analyzer.analyze(seq, "nonExistentMethod")
+
+
+# ---------- process_sequences ----------
+def test_process_sequences_single_sequence(analyzer):
+    results = analyzer.process_sequences(
+        sequence_input="ATGCATGC",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="gc_percent"
+    )
+    test_results, sequence_keys = results
+    assert len(sequence_keys) == 1
+    assert sequence_keys[0] == "input_sequence"
+    assert test_results[sequence_keys[0]] == "50.0 %"
+
+
+def test_process_sequences_invalid_analysis_method(analyzer):
+    with pytest.raises(AnalysisMethodError):
+        results = analyzer.process_sequences(
+            sequence_input="ATGC",
+            is_file=False,
+            seq_type="DNA",
+            analysis_method="invalid_method"
+        )
+
+        # process_sequences should handle the error internally and return no results
+        assert results == []
+
+
+def test_process_sequences_rna_translation(analyzer):
+    results = analyzer.process_sequences(
+        sequence_input="AUGUUUUAA",
+        is_file=False,
+        seq_type="RNA",
+        analysis_method="translate"
+    )
+    test_results, sequence_keys = results
+    assert len(sequence_keys) == 1
+    assert sequence_keys[0] == "input_sequence"
+    assert test_results[sequence_keys[0]] == "MF*"
+
+
+def test_process_sequences_type_mismatch(analyzer):
+    with pytest.raises(InvalidSequenceTypeError):
+        analyzer.process_sequences(
+            sequence_input="ATGC",
+            is_file=False,
+            seq_type="DNA",
+            analysis_method="translate"
+        )
+
+
+# ---------- ORF Finder ----------
+
+def test_orf_finder_simple_sequence(analyzer):
+    results = analyzer.process_sequences(
+        sequence_input="ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    assert result == {"input_sequence": {
+                    "Number of ORFS": 1,
+                    "ORFS": {
+                        "ORF_1": {
+                            "Sequence": "ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG",
+                            "Start": 0,
+                            "End": 32,
+                            "Length": 33
+                        }
+                    }
+                }
+    }
+
+
+def test_orf_finder_complex_sequence(analyzer):
+    results = analyzer.process_sequences(
+        sequence_input="ATGAAATGAATGTAGATGCCCTAA",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    assert result == {"input_sequence": {
+                        "Number of ORFS": 3,
+                        "ORFS": {
+                            "ORF_1": {
+                                "Sequence": "ATGAAATGA",
+                                "Start": 0,
+                                "End": 8,
+                                "Length": 9
+                            },
+                            "ORF_2": {
+                                "Sequence": "ATGTAG",
+                                "Start": 9,
+                                "End": 14,
+                                "Length": 6
+                            },
+                            "ORF_3": {
+                                "Sequence": "ATGCCCTAA",
+                                "Start": 15,
+                                "End": 23,
+                                "Length": 9
+                            }
+                        }
+                    }
+                }
+
+
+def test_orf_finder_RNA(analyzer):
+    with pytest.raises(InvalidSequenceTypeError):
+        analyzer.process_sequences(
+            sequence_input="ATGAAATGAATGTAGATGCCCTAA",
+            is_file=False,
+            seq_type="RNA",
+            analysis_method="orf"
+        )

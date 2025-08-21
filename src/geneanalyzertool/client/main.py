@@ -1,7 +1,12 @@
 import argparse
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
-from geneanalyzertool.core.sequences import DNA, RNA, Protein
-from geneanalyzertool.core.file_handler import FileHandler
+from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError, SequenceParsingError
+
+YELLOW = "\033[1;33m"
+GREEN = "\033[1;32m"
+RED = "\033[1;31m"
+RESET = "\033[0m"
+CYAN = "\033[1;36m"
 
 # if a class is added to this map, --mode in parse_args() must also be updated.
 analysis_map = {
@@ -9,7 +14,7 @@ analysis_map = {
 }
 
 analysis_options = {
-    "basic": ['gc_percent', 'base_count', 'translate', 'transcribe', 'reverse_complement']
+    "basic": ['gc_percent', 'base_count', 'translate', 'transcribe', 'reverse_complement', 'orf']
 }
 
 
@@ -64,43 +69,41 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    # Validate analysis option for the selected mode
+    if args.analysis not in analysis_options[args.mode]:
+        print(f"{RED}Error: Analysis '{args.analysis}' is not valid for mode '{args.mode}'.")
+        print(f"Valid options: {GREEN}{analysis_options[args.mode]}{RESET}")
+        exit(1)
+
+    # Get the appropriate analysis class based on mode
     analysis_class = analysis_map[args.mode]
     analyzer = analysis_class()
 
-    if args.analysis not in analysis_options[args.mode]:
-        print(f"Error: Analysis '{args.analysis}' is not valid for mode '{args.mode}'.")
-        print(f"Valid options: {analysis_options[args.mode]}")
+    try:
+        # Delegate sequence processing to the analysis class
+        results, sequence_keys = analyzer.process_sequences(
+            sequence_input=args.sequence,
+            is_file=args.file,
+            seq_type=args.type,
+            analysis_method=args.analysis
+        )
+
+        # Output results
+        if args.out:
+            analyzer.export_to_file(results, sequence_keys, args.out)
+        else:
+            analyzer.print_to_terminal(results, sequence_keys)
+
+    except InvalidSequenceTypeError as e:
+        print(RED + str(e) + RESET)
         exit(1)
-
-    if args.file:
-        filehandler = FileHandler()
-        available_sequences, sequence_keys = filehandler.read_in_sequence(args.sequence)
-    else:
-        # Treat the single sequence as a dict with one entry
-        available_sequences = {"input_sequence": args.sequence}
-        sequence_keys = ["input_sequence"]
-
-    results = []
-    for key in sequence_keys:
-        print(f"Analyzing {key}...")
-        type_map = {"DNA": DNA, "RNA": RNA, "Protein": Protein}
-        seq_type = type_map[args.type]
-        sequence_obj = seq_type(available_sequences[key])
-
-        try:
-            result = analyzer.analyze(sequence_obj, args.analysis)
-            results.append(f"{key}: {result}")
-        except Exception as e:
-            print(f"Error: Analysis interrupted - {e}")
-            exit(1)
-
-    if args.out:
-        with open(args.out, 'w') as out_file:
-            for line in results:
-                out_file.write(line + "\n")
-    else:
-        for line in results:
-            print(line)
+    except AnalysisMethodError as e:
+        print(RED + str(e) + RESET)
+        exit(1)
+    except SequenceParsingError as e:
+        print(RED + str(e) + RESET)
+        exit(1)
 
 
 if __name__ == "__main__":
