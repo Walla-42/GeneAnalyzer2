@@ -2,6 +2,12 @@ import argparse
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
 from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
 
+YELLOW = "\033[1;33m"
+GREEN = "\033[1;32m"
+RED = "\033[1;31m"
+RESET = "\033[0m"
+CYAN = "\033[1;36m"
+
 # if a class is added to this map, --mode in parse_args() must also be updated.
 analysis_map = {
     "basic": BasicSequenceAnalysis
@@ -66,8 +72,8 @@ def main():
 
     # Validate analysis option for the selected mode
     if args.analysis not in analysis_options[args.mode]:
-        print(f"Error: Analysis '{args.analysis}' is not valid for mode '{args.mode}'.")
-        print(f"Valid options: {analysis_options[args.mode]}")
+        print(f"{RED}Error: Analysis '{args.analysis}' is not valid for mode '{args.mode}'.")
+        print(f"Valid options: {GREEN}{analysis_options[args.mode]}{RESET}")
         exit(1)
 
     # Get the appropriate analysis class based on mode
@@ -90,10 +96,10 @@ def main():
             analyzer.print_to_terminal(results, sequence_keys)
 
     except InvalidSequenceTypeError as e:
-        print(str(e))
+        print(RED + str(e) + RESET)
         exit(1)
     except AnalysisMethodError as e:
-        print(str(e))
+        print(RED + str(e) + RESET)
         exit(1)
 
 

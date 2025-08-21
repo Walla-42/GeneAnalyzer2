@@ -4,6 +4,11 @@ from geneanalyzertool.core.file_handler import FileHandler
 from typing import Any, override, List
 from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
 
+YELLOW = "\033[1;33m"
+GREEN = "\033[1;32m"
+RED = "\033[1;31m"
+RESET = "\033[0m"
+CYAN = "\033[1;36m"
 
 class BasicSequenceAnalysis(Analysis, FileHandler):
     """
@@ -13,32 +18,41 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
     Note: If you are adding a method to the Basic analysis mode, add your method below and add a call to your method in the analyze method. 
     Make sure your method is private (pythonic private) by adding an underscore "_" before the method name. 
     """
-    def format_orf_result(self, seq_name, orf_result):
+
+    @override
+    def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
+        def format_orf_result(seq_name, orf_result):
             lines = [f"Sequence Name: {seq_name}"]
             lines.append(f"Number of ORFs: {orf_result['Number of ORFS']}")
             for orf_name, orf_data in orf_result['ORFS'].items():
                 lines.append(f"{orf_name}: {orf_data['Sequence']}")
                 lines.append(f"  Start: {orf_data['Start']} End: {orf_data['End']} Length: {orf_data['Length']}")
             return "\n".join(lines)
-
-    @override
-    def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
+        
         with open(out_file, 'w') as out:
             for seq in sequence_keys:
                 value = results[seq]
                 if isinstance(value, dict) and 'ORFS' in value:
-                    out.write(self.format_orf_result(seq, value) + "\n")
+                    out.write(format_orf_result(seq, value) + "\n\n")
                 else:
                     out.write(f"{seq}: {value}\n")
 
     @override
     def print_to_terminal(self, results: dict, sequence_keys: List[str]):
+        def format_orf_result(seq_name, orf_result):
+            lines = [f"{YELLOW}Sequence Name: {RESET}{seq_name}"]
+            lines.append(f"{GREEN}Number of ORFs:{RESET} {orf_result['Number of ORFS']}")
+            for orf_name, orf_data in orf_result['ORFS'].items():
+                lines.append(f"{GREEN}{orf_name}:{RESET} {orf_data['Sequence']}")
+                lines.append(f"  {CYAN}Start:{RESET} {orf_data['Start']} {CYAN}End:{RESET} {orf_data['End']} {CYAN}Length:{RESET} {orf_data['Length']}")
+            return "\n".join(lines)
+        
         for seq in sequence_keys:
             value = results[seq]
             if isinstance(value, dict) and 'ORFS' in value:
-                print(self.format_orf_result(seq, value))
+                print(format_orf_result(seq, value) + "\n")
             else:
-                print(f"{seq}: {value}")
+                print(f"{YELLOW}{seq}{RESET}: {value}")
 
     @override
     def analyze(self, sequence: Sequence, method: str) -> Any:
@@ -99,7 +113,6 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
         # Process each sequence
         results = {}
         for key in sequence_keys:
-            print(f"Analyzing {key}...")
             sequence_obj = seq_type_class(available_sequences[key])
             try:
                 result = self.analyze(sequence_obj, analysis_method)
@@ -111,7 +124,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
         return results, sequence_keys
 
-    def _gc_percent(self, sequence: DNA | RNA, ) -> float:
+    def _gc_percent(self, sequence: DNA | RNA, ) -> str:
         """
         Calculates the percent Guanine and Cytosine that are present in a DNA or RNA Molecule.
         Sequence must be of type RNA or DNA.
@@ -120,7 +133,7 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             raise TypeError("Error: Sequence must be of type DNA or RNA")
 
         gc_count = sequence.upper().count("G") + sequence.upper().count("C")
-        return round((gc_count / len(sequence)) * 100, 2)
+        return f"{round((gc_count / len(sequence)) * 100, 2)} %"
 
     def _base_count(self, sequence) -> dict:
         """
@@ -230,6 +243,8 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
                         "Length": (j + 3) - i
                     }
                     break
+        if len(ORFS) == 0:
+            ORFS = "No Open Reading Frames"
         result = {
             "Number of ORFS": ORF_count,
             "ORFS": ORFS

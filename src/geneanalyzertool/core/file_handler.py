@@ -1,6 +1,11 @@
 from Bio import SeqIO
 from typing import List
 
+YELLOW = "\033[1;33m"
+GREEN = "\033[1;32m"
+RED = "\033[1;31m"
+RESET = "\033[0m"
+CYAN = "\033[1;36m"
 
 class FileHandler():
     """Handles file operations for GeneAnalyzer2 tool."""
@@ -41,13 +46,13 @@ class FileHandler():
         sequences = self.read_sequences(fasta_file)
         keys = list(sequences.keys())
 
-        print("Available sequences:")
+        print(YELLOW + "Available sequences:" + RESET)
         for idx, record_id in enumerate(keys, 1):
-            print(f"{idx}. {record_id}")
+            print(f"{CYAN}{idx}.{GREEN} {record_id}{RESET}")
 
         for _ in range(max_attempts):
-            select = selection_func(
-                'Select a sequence by number, or type "all" for all sequences:\n>>> '
+            select = selection_func(YELLOW + 
+                'Select a sequence by number, or type "all" for all sequences:\n>>> ' + RESET
             ).strip().lower()
 
             if select == "all":
@@ -59,10 +64,10 @@ class FileHandler():
                     record_id = keys[index]
                     seq = sequences[record_id]
 
-                    print(f"ID: {record_id}")
-                    print(f"Length: {len(seq)}")
+                    print(f"{YELLOW}Name:{GREEN} {record_id}{RESET}")
+                    print(f"{YELLOW}Length:{RESET} {len(seq)}")
                     return {record_id: seq}, [record_id]
 
-            print('\033[1;31mInvalid selection. Please try again.\033[0m')
+            print(f'{RED}Invalid selection. Please try again.{RESET}')
 
         raise ValueError("Error: Maximum attempts exceeded. No valid sequences selected.")
