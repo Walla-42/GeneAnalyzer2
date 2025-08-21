@@ -52,12 +52,6 @@ def parse_args():
         help='Type of analysis to perform. Based on mode chosen.'
     )
 
-    parser.add_argument(
-        '--min',
-        help='Minimum number of base pairs. For ORF analysis, this is the minimum ' \
-        'number of base pairs returned ORFs must have'
-    )
-
     # output file args
     parser.add_argument(
         '--out', '-o',
