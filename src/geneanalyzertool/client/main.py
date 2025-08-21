@@ -1,6 +1,6 @@
 import argparse
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
-from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
+from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError, SequenceParsingError
 
 YELLOW = "\033[1;33m"
 GREEN = "\033[1;32m"
@@ -99,6 +99,9 @@ def main():
         print(RED + str(e) + RESET)
         exit(1)
     except AnalysisMethodError as e:
+        print(RED + str(e) + RESET)
+        exit(1)
+    except SequenceParsingError as e:
         print(RED + str(e) + RESET)
         exit(1)
 

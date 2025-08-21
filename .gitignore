@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+#files
+*.fasta
+*.fna
+*.txt
+!.gitmessage.txt
+
+
 #dev env
 /scripts
 /.githooks

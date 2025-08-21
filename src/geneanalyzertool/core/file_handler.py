@@ -1,5 +1,6 @@
 from Bio import SeqIO
 from typing import List
+from geneanalyzertool.core.exceptions import SequenceParsingError
 
 YELLOW = "\033[1;33m"
 GREEN = "\033[1;32m"
@@ -70,4 +71,4 @@ class FileHandler():
 
             print(f'{RED}Invalid selection. Please try again.{RESET}')
 
-        raise ValueError("Error: Maximum attempts exceeded. No valid sequences selected.")
+        raise SequenceParsingError("Error: Maximum attempts exceeded. No valid sequences selected.")
