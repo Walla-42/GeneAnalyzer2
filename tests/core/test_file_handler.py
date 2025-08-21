@@ -4,6 +4,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from geneanalyzertool.core.file_handler import FileHandler
+from geneanalyzertool.core.exceptions import SequenceParsingError
 
 
 @pytest.fixture
@@ -65,5 +66,5 @@ def test_select_sequences_exceed_max_attempts(mock_records):
     fh = FileHandler()
     inputs = iter(["5", "0", "-1"])
     with patch("Bio.SeqIO.parse", return_value=mock_records):
-        with pytest.raises(ValueError, match="Maximum attempts exceeded"):
+        with pytest.raises(SequenceParsingError, match="Error: Maximum attempts exceeded. No valid sequences selected."):
             fh.select_sequences("dummy.fasta", selection_func=lambda _: next(inputs))

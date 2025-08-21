@@ -13,14 +13,14 @@ def analyzer():
 def test_gc_percent_dna(analyzer):
     seq = DNA("ATGCGC")
     result = analyzer._gc_percent(seq)
-    expected = round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)
+    expected = f"{round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)} %"
     assert result == expected
 
 
 def test_gc_percent_rna(analyzer):
     seq = RNA("AUGCGC")
     result = analyzer._gc_percent(seq)
-    expected = round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)
+    expected = f"{round((seq.upper().count("G") + seq.upper().count("C")) / len(seq) * 100, 2)} %"
     assert result == expected
 
 
@@ -134,7 +134,7 @@ def test_process_sequences_single_sequence(analyzer):
     test_results, sequence_keys = results
     assert len(sequence_keys) == 1
     assert sequence_keys[0] == "input_sequence"
-    assert test_results[sequence_keys[0]] == 50.0
+    assert test_results[sequence_keys[0]] == "50.0 %"
 
 
 def test_process_sequences_invalid_analysis_method(analyzer):
