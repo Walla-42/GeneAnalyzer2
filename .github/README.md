@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/walla-42/GeneAnalyzer2">
-    <img src="/docs/images/GeneAnalyzer2Logo.png" alt="Logo">
+    <img src="/docs/images/readme_images/GeneAnalyzer2Logo.png" alt="Logo">
   </a>
 </div>
 
@@ -74,10 +74,30 @@ geneanalyzer2 --file test_sequences.fasta --type DNA --analysis base_count
 ```sh
 geneanalyzer2 --file test_sequences.fasta --type DNA --analysis gc_percent --out results.txt
 ```
+## Whats New
+- Easier to view terminal output and better file save handling
 
+<div align="center">
+  <img src="/docs/images/readme_images/Improved_text_generation_output.png" alt="Improved Terminal Text">
+</div>
 
+- New open reading frame finder in basic mode
 
+<div align="center">
+  <img src="/docs/images/readme_images/orf_method.png" alt="ORF Method Terminal Output">
+</div>
 
+- GC percent calculations now have '%' after the calculated value
+
+<div align="center">  
+  <img src="/docs/images/readme_images/updated_gc.png" alt="Updated GC Output">
+</div>
+
+- Error handling has been improved with better user end messages
+
+<div align="center">
+  <img src="/docs/images/readme_images/error_message.png" alt="Example Error Message">
+</div>
 
 ## License
 
