@@ -78,7 +78,7 @@ geneanalyzer2 --file test_sequences.fasta --type DNA --analysis gc_percent --out
 - Easier to view terminal output and better file save handling
 
 <div align="center">
-  <img src="/docs/images/readme_images/Improved_text_generation_output.png" alt="Improved Terminal Text">
+  <img src="/docs/images/readme_images/option_handling.png" alt="Improved option handling">
 </div>
 
 - New open reading frame finder in basic mode
