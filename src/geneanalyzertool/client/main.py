@@ -52,6 +52,12 @@ def parse_args():
         help='Type of analysis to perform. Based on mode chosen.'
     )
 
+    parser.add_argument(
+        '--min', '-m',
+        help='Minimum number of base pairs. For ORF analysis, this is the minimum ' \
+        'number of base pairs returned ORFs must have'
+    )
+
     # output file args
     parser.add_argument(
         '--out', '-o',
@@ -76,7 +82,7 @@ def main():
 
     try:
         # Delegate sequence processing to the analysis class
-        results = analyzer.process_sequences(
+        results, sequence_keys = analyzer.process_sequences(
             sequence_input=args.sequence,
             is_file=args.file,
             seq_type=args.type,
@@ -85,7 +91,7 @@ def main():
 
         # Output results
         if args.out:
-            analyzer.export_to_file(results, args.out)
+            analyzer.export_to_file(results, sequence_keys, args.out)
         else:
             for line in results:
                 print(line)

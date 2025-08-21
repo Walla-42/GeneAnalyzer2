@@ -8,7 +8,7 @@ class FileHandler():
     def __init__(self):
         pass
 
-    def export_to_file(self, results: List[str], out_file: str):
+    def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
         raise NotImplementedError("Subclasses must implement this method.")
 
     def file_support_check(self, file: str) -> bool:

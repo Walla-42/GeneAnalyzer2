@@ -131,13 +131,12 @@ def test_process_sequences_single_sequence(analyzer):
         seq_type="DNA",
         analysis_method="gc_percent"
     )
+    test_results, sequence_keys = results
+    assert len(sequence_keys) == 1
+    assert sequence_keys[0] == "input_sequence"
+    assert test_results[sequence_keys[0]] == 50.0
 
-    assert len(results) == 1
-    assert results[0].startswith("input_sequence:")
-    assert "50.0" in results[0]
-
-
-def test_process_sequences_invalid_analysis_method(analyzer, capsys):
+def test_process_sequences_invalid_analysis_method(analyzer):
     with pytest.raises(AnalysisMethodError):
         results = analyzer.process_sequences(
             sequence_input="ATGC",
@@ -158,19 +157,85 @@ def test_process_sequences_rna_translation(analyzer):
         seq_type="RNA",
         analysis_method="translate"
     )
+    test_results, sequence_keys = results
+    assert len(sequence_keys) == 1
+    assert sequence_keys[0] == "input_sequence"
+    assert test_results[sequence_keys[0]] == "MF*"
 
-    assert len(results) == 1
-    assert results[0].startswith("input_sequence:")
-    assert "MF*" in results[0]
 
-
-def test_process_sequences_type_mismatch(analyzer, capsys):
+def test_process_sequences_type_mismatch(analyzer):
     with pytest.raises(InvalidSequenceTypeError):
-        results = analyzer.process_sequences(
+            analyzer.process_sequences(
             sequence_input="ATGC",
             is_file=False,
             seq_type="DNA",
             analysis_method="translate"
         )
 
-        assert results == []
+
+# ---------- ORF Finder ----------
+
+def test_orf_finder_simple_seqeunce(analyzer):
+    results = analyzer.process_sequences(
+        sequence_input = "ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    assert result == {"input_sequence": {
+                    "Number of ORFS": 1,
+                    "ORFS": {
+                        "ORF_1": {
+                            "Sequence": "ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG",
+                            "Start": 0,
+                            "End": 32,
+                            "Length": 33
+                        }
+                    }
+                }
+    }
+
+
+def test_orf_finder_complex_seqeunce(analyzer):
+    results = analyzer.process_sequences(
+        sequence_input = "ATGAAATGAATGTAGATGCCCTAA",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    assert result == {"input_sequence": {
+                        "Number of ORFS": 3,
+                        "ORFS": {
+                            "ORF_1": {
+                                "Sequence": "ATGAAATGA",
+                                "Start": 0,
+                                "End": 8,
+                                "Length": 9
+                            }, 
+                            "ORF_2": {
+                                "Sequence": "ATGTAG",
+                                "Start": 9,
+                                "End": 14,
+                                "Length": 6
+                            },
+                            "ORF_3": {
+                                "Sequence": "ATGCCCTAA",
+                                "Start": 15,
+                                "End": 23,
+                                "Length": 9
+                            }
+                        }
+                    }
+                }
+    
+def test_orf_finder_RNA(analyzer):
+    with pytest.raises(InvalidSequenceTypeError):
+            analyzer.process_sequences(
+            sequence_input = "ATGAAATGAATGTAGATGCCCTAA",
+            is_file=False,
+            seq_type="RNA",
+            analysis_method="orf"
+        )
+                

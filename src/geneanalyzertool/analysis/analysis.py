@@ -14,5 +14,5 @@ class Analysis(ABC):
         raise NotImplementedError("Subclasses must implement this method.")
 
     @abstractmethod
-    def process_sequences(self, sequence_input: str, is_file: bool, seq_type: str, analysis_method: str) -> List[str]:
+    def process_sequences(self, sequence_input: str, is_file: bool, seq_type: str, analysis_method: str):
         raise NotImplementedError("Subclasses must implement this method.")

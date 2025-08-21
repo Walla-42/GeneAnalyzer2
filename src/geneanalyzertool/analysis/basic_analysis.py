@@ -7,16 +7,47 @@ from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisM
 
 class BasicSequenceAnalysis(Analysis, FileHandler):
     """
-    Class for basic analysis performed on dna, rna or protein sequences
+    Class for basic analysis performed on dna, rna or protein sequences. This class holds all the basic mode functionality. 
+    It extends the Analysis class and implements the FileHandler interface.
+    
+    Note: If you are adding a method to the Basic analysis mode, add your method below and add a call to your method in the analyze method. 
+    Make sure your method is private (pythonic private) by adding an underscore "_" before the method name. 
     """
 
     @override
-    def export_to_file(self, results: List[str], out_file: str):
+    def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
         with open(out_file, 'w') as out:
-            for line in results:
-                out.write(line + "\n")
+            for seq in sequence_keys:
+                out.write(f"{seq}: {results[seq]}" + "\n")
 
-    def process_sequences(self, sequence_input: str, is_file: bool, seq_type: str, analysis_method: str) -> List[str]:
+    
+    @override
+    def analyze(self, sequence: Sequence, method: str) -> Any:
+        """
+        executes simple analysis of protein, RNA or DNA sequences.
+        Args:
+            sequence: Sequence object to analyze
+            method: Analysis method to perform
+        Returns:
+            Result of analysis 
+
+        Note: If adding a method to the basic analysis options, add it also in the method dispatch below. 
+        """
+        method_dispatch = {
+            "gc_percent": self._gc_percent,
+            "base_count": self._base_count,
+            "translate": self._translate,
+            "transcribe": self._transcribe,
+            "reverse_complement": self._reverse_complement,
+            "orf": self._orf_finder
+        }
+
+        if method not in method_dispatch:
+            raise ValueError(f"Unknown method {method}")
+
+        return method_dispatch[method](sequence)
+
+    def process_sequences(self, sequence_input: str, is_file: bool, seq_type: str, analysis_method: str):
         """
         Process one or more sequences and perform the specified analysis.
 
@@ -47,39 +78,21 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             raise InvalidSequenceTypeError("Error: Invalid sequence type provided. Valid types are DNA, RNA, or Protein.")
 
         # Process each sequence
-        results = []
+        results = {}
         for key in sequence_keys:
             print(f"Analyzing {key}...")
             sequence_obj = seq_type_class(available_sequences[key])
             try:
                 result = self.analyze(sequence_obj, analysis_method)
-                results.append(f"{key}: {result}")
+                results[key] = result
             except ValueError as e:
                 raise AnalysisMethodError(f"Invalid analysis method provided. {str(e)}")
             except TypeError as e:
                 raise InvalidSequenceTypeError(f"Unable to perform this analysis on sequence of type {seq_type.upper()}. {e}")
 
-        return results
+        return results, sequence_keys
 
-    @override
-    def analyze(self, sequence: Sequence, method: str) -> Any:
-        """
-        executes simple analysis of protein, RNA or DNA sequences.
-        """
-        method_dispatch = {
-            "gc_percent": self._gc_percent,
-            "base_count": self._base_count,
-            "translate": self._translate,
-            "transcribe": self._transcribe,
-            "reverse_complement": self._reverse_complement
-        }
-
-        if method not in method_dispatch:
-            raise ValueError(f"Unknown method {method}")
-
-        return method_dispatch[method](sequence)
-
-    def _gc_percent(self, sequence: DNA | RNA) -> float:
+    def _gc_percent(self, sequence: DNA | RNA, ) -> float:
         """
         Calculates the percent Guanine and Cytosine that are present in a DNA or RNA Molecule.
         Sequence must be of type RNA or DNA.
@@ -172,3 +185,36 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
         if isinstance(sequence, RNA):
             reverse_complement = sequence.translate(str.maketrans("AUGCaugc", "UACGuacg"))[::-1]
             return RNA(reverse_complement)
+
+    def _orf_finder(self, sequence: DNA):
+        if not isinstance(sequence, DNA):
+            raise TypeError("Error: Sequence must be of type DNA")
+        
+        start_codons = ["ATG"]
+        stop_codons = ["TAA", "TAG", "TGA"]
+        ORFS = {}
+        ORF_count = 0
+        for i in range(0, len(sequence)):
+            codon = sequence[i:i + 3]
+            if codon not in start_codons:
+                continue
+            for j in range(i, len(sequence), 3):
+                codon = sequence[j:j + 3]
+                if codon in stop_codons:
+                    ORF_count += 1
+                    orf_name = f"ORF_{ORF_count}"
+                    orf_seq = sequence[i:j+3]  
+                    ORFS[orf_name] = {
+                        "Sequence": orf_seq,
+                        "Start": i,
+                        "End": j + 2,
+                        "Length": (j + 3) - i
+                    }
+                    break
+        result = {
+            "Number of ORFS": ORF_count,
+            "ORFS": ORFS
+        }
+        return result
+    
+        
