@@ -1,6 +1,7 @@
 import argparse
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
 from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError, SequenceParsingError
+from geneanalyzertool.analysis.file_conversion import FileConversion
 
 YELLOW = "\033[1;33m"
 GREEN = "\033[1;32m"
@@ -10,7 +11,8 @@ CYAN = "\033[1;36m"
 
 # if a class is added to this map, --mode in parse_args() must also be updated.
 analysis_map = {
-    "basic": BasicSequenceAnalysis
+    "basic": BasicSequenceAnalysis,
+    "file_conv": FileConversion
 }
 
 analysis_options = {
