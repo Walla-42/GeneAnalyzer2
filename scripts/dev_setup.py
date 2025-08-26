@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import subprocess
 
+
 def main():
     repo_root = Path(__file__).resolve().parent.parent
     git_dir = repo_root / ".git"
@@ -27,6 +28,7 @@ def main():
     )
 
     print("Git hooks and commit template installed successfully.")
+
 
 if __name__ == "__main__":
     main()

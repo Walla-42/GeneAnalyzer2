@@ -1,6 +1,7 @@
 import argparse
 from geneanalyzertool.analysis.basic_analysis import BasicSequenceAnalysis
 from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError, SequenceParsingError
+from geneanalyzertool.analysis.file_conversion import FileConversion
 
 YELLOW = "\033[1;33m"
 GREEN = "\033[1;32m"
@@ -10,11 +11,13 @@ CYAN = "\033[1;36m"
 
 # if a class is added to this map, --mode in parse_args() must also be updated.
 analysis_map = {
-    "basic": BasicSequenceAnalysis
+    "basic": BasicSequenceAnalysis,
+    "file_conv": FileConversion
 }
 
 analysis_options = {
-    "basic": ['gc_percent', 'base_count', 'translate', 'transcribe', 'reverse_complement', 'orf']
+    "basic": ['gc_percent', 'base_count', 'translate', 'transcribe', 'reverse_complement', 'orf'],
+    "file_conv": ['convert', 'validate', 'batch_convert']
 }
 
 
@@ -40,16 +43,15 @@ def parse_args():
     parser.add_argument(
         '--type', '-t',
         choices=['DNA', 'RNA', 'Protein'],
-        required=True,
-        help='Specify the sequence type: DNA, RNA, or Protein.'
+        help='Specify the sequence type: DNA, RNA, or Protein. Not required for file conversion mode.'
     )
 
     # analysis args
     parser.add_argument(
         '--mode', '-m',
-        choices=['basic'],
+        choices=['basic', 'file_conv'],
         default='basic',
-        help='Mode of analysis to be performed. Default is basic. Refer to docs for more information.'
+        help='Mode of analysis to be performed. Default is basic. Use file_conv for file format conversion.'
     )
 
     parser.add_argument(
@@ -69,6 +71,11 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    # Validate required arguments based on mode
+    if args.mode != 'file_conv' and not args.type:
+        print(f"{RED}Error: --type is required for mode '{args.mode}'.{RESET}")
+        exit(1)
 
     # Validate analysis option for the selected mode
     if args.analysis not in analysis_options[args.mode]:
