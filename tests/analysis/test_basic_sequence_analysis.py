@@ -146,7 +146,6 @@ def test_process_sequences_invalid_analysis_method(analyzer):
             analysis_method="invalid_method"
         )
 
-        # process_sequences should handle the error internally and return no results
         assert results == []
 
 
@@ -183,18 +182,20 @@ def test_orf_finder_simple_sequence(analyzer):
         analysis_method="orf"
     )
     result, sequence_keys = results
-    assert result == {"input_sequence": {
-                    "Number of ORFS": 1,
-                    "ORFS": {
-                        "ORF_1": {
-                            "Sequence": "ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG",
-                            "Start": 0,
-                            "End": 32,
-                            "Length": 33
-                        }
-                    }
-                }
+    expected_result = {
+        "Number of ORFS": 1,
+        "ORFS": {
+            "ORF_1": {
+                "Sequence": "ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG",
+                "Start": 0,
+                "End": 32,
+                "Length": 33,
+                "Type": "DNA-based ORF"
+            }
+        },
+        "Sequence_Type": "DNA"
     }
+    assert result == {"input_sequence": expected_result}
 
 
 def test_orf_finder_complex_sequence(analyzer):
@@ -205,37 +206,188 @@ def test_orf_finder_complex_sequence(analyzer):
         analysis_method="orf"
     )
     result, sequence_keys = results
-    assert result == {"input_sequence": {
-                        "Number of ORFS": 3,
-                        "ORFS": {
-                            "ORF_1": {
-                                "Sequence": "ATGAAATGA",
-                                "Start": 0,
-                                "End": 8,
-                                "Length": 9
-                            },
-                            "ORF_2": {
-                                "Sequence": "ATGTAG",
-                                "Start": 9,
-                                "End": 14,
-                                "Length": 6
-                            },
-                            "ORF_3": {
-                                "Sequence": "ATGCCCTAA",
-                                "Start": 15,
-                                "End": 23,
-                                "Length": 9
-                            }
-                        }
-                    }
-                }
+    expected_result = {
+        "Number of ORFS": 3,
+        "ORFS": {
+            "ORF_1": {
+                "Sequence": "ATGAAATGA",
+                "Start": 0,
+                "End": 8,
+                "Length": 9,
+                "Type": "DNA-based ORF"
+            },
+            "ORF_2": {
+                "Sequence": "ATGTAG",
+                "Start": 9,
+                "End": 14,
+                "Length": 6,
+                "Type": "DNA-based ORF"
+            },
+            "ORF_3": {
+                "Sequence": "ATGCCCTAA",
+                "Start": 15,
+                "End": 23,
+                "Length": 9,
+                "Type": "DNA-based ORF"
+            }
+        },
+        "Sequence_Type": "DNA"
+    }
+    assert result == {"input_sequence": expected_result}
 
 
-def test_orf_finder_RNA(analyzer):
-    with pytest.raises(InvalidSequenceTypeError):
-        analyzer.process_sequences(
-            sequence_input="ATGAAATGAATGTAGATGCCCTAA",
-            is_file=False,
-            seq_type="RNA",
-            analysis_method="orf"
-        )
+def test_orf_finder_RNA_basic(analyzer):
+    """Test ORF finding in RNA sequences (transcript-based) with overlapping ORFs."""
+    results = analyzer.process_sequences(
+        sequence_input="AUGAAAUGAAUGUCCAUGCCUUAA",
+        is_file=False,
+        seq_type="RNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    expected_result = {
+        "Number of ORFS": 3,
+        "ORFS": {
+            "ORF_1": {
+                "Sequence": "AUGAAAUGA",
+                "Start": 0,
+                "End": 8,
+                "Length": 9,
+                "Type": "RNA-based ORF (transcript)"
+            },
+            "ORF_2": {
+                "Sequence": "AUGUCCAUGCCUUAA", 
+                "Start": 9,
+                "End": 23,
+                "Length": 15,
+                "Type": "RNA-based ORF (transcript)"
+            },
+            "ORF_3": {
+                "Sequence": "AUGCCUUAA",
+                "Start": 15,
+                "End": 23,
+                "Length": 9,
+                "Type": "RNA-based ORF (transcript)"
+            }
+        },
+        "Sequence_Type": "RNA"
+    }
+    assert result == {"input_sequence": expected_result}
+
+
+def test_orf_finder_RNA_simple(analyzer):
+    """Test simple RNA ORF finding."""
+    results = analyzer.process_sequences(
+        sequence_input="AUGGGCUUAUAG",
+        is_file=False,
+        seq_type="RNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    expected_result = {
+        "Number of ORFS": 1,
+        "ORFS": {
+            "ORF_1": {
+                "Sequence": "AUGGGCUUAUAG",
+                "Start": 0,
+                "End": 11,
+                "Length": 12,
+                "Type": "RNA-based ORF (transcript)"
+            }
+        },
+        "Sequence_Type": "RNA"
+    }
+    assert result == {"input_sequence": expected_result}
+
+
+def test_orf_finder_RNA_no_orfs(analyzer):
+    """Test RNA sequence with no ORFs."""
+    results = analyzer.process_sequences(
+        sequence_input="GGGCCCAAAUUUGGG",
+        is_file=False,
+        seq_type="RNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    expected_result = {
+        "Number of ORFS": 0,
+        "ORFS": {},
+        "Sequence_Type": "RNA"
+    }
+    assert result == {"input_sequence": expected_result}
+
+
+def test_orf_finder_mixed_case_sequence(analyzer):
+    """Test ORF finding with mixed case sequences."""
+    results = analyzer.process_sequences(
+        sequence_input="atgGGGcgcGCGcgcGCGcgcGCGcgcTAGttag",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    assert result["input_sequence"]["Number of ORFS"] == 1
+    assert result["input_sequence"]["ORFS"]["ORF_1"]["Sequence"] == "atgGGGcgcGCGcgcGCGcgcGCGcgcTAG"
+
+
+def test_orf_finder_overlapping_orfs_DNA(analyzer):
+    """Test DNA ORF finding with overlapping ORFs."""
+    results = analyzer.process_sequences(
+        sequence_input="ATGAAATGGTAAATGCCCTAG",
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    assert result["input_sequence"]["Number of ORFS"] >= 2
+
+
+def test_orf_finder_overlapping_orfs_RNA(analyzer):
+    """Test RNA ORF finding with overlapping ORFs."""
+    results = analyzer.process_sequences(
+        sequence_input="AUGAAAUGGUGAAUGCCGUAG", 
+        is_file=False,
+        seq_type="RNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    orfs = result["input_sequence"]["ORFS"]
+    for orf_data in orfs.values():
+        assert 'U' in orf_data["Sequence"] or 'u' in orf_data["Sequence"]
+
+
+def test_orf_finder_performance_regex(analyzer):
+    """Test that regex-based ORF finding works with larger sequences."""
+    long_sequence = "ATGAAATAG" * 100 + "ATGGGGTAG" * 50  
+    results = analyzer.process_sequences(
+        sequence_input=long_sequence,
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    assert result["input_sequence"]["Number of ORFS"] > 0
+    
+    long_rna_sequence = "AUGAAAUAG" * 100 + "AUGGGGUAG" * 50
+    results_rna = analyzer.process_sequences(
+        sequence_input=long_rna_sequence,
+        is_file=False,
+        seq_type="RNA",
+        analysis_method="orf"
+    )
+    result_rna, _ = results_rna
+    assert result_rna["input_sequence"]["Number of ORFS"] > 0
+    assert result_rna["input_sequence"]["Sequence_Type"] == "RNA"
+
+
+def test_orf_finder_incomplete_codon_handling(analyzer):
+    """Test ORF finder with sequences that don't end on codon boundaries."""
+    results = analyzer.process_sequences(
+        sequence_input="ATGGGCTAG AA", 
+        is_file=False,
+        seq_type="DNA",
+        analysis_method="orf"
+    )
+    result, sequence_keys = results
+    assert result["input_sequence"]["Number of ORFS"] == 1
+    assert result["input_sequence"]["ORFS"]["ORF_1"]["Sequence"] == "ATGGGCTAG"

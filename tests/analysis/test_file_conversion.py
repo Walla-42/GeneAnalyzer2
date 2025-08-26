@@ -41,10 +41,10 @@ KKKKKKKKKKKKKKKKK
 def invalid_fastq():
     """Create an invalid FASTQ file for testing."""
     content = """seq1 sample sequence 1
-    ATGCGATCGATCGATCG
-    +
-    IIIIIIIIIIIIIIII
-    """
+ATGCGATCGATCGATCG
++
+IIIIIIIIIIIIIIII
+"""
 
     with tempfile.NamedTemporaryFile(mode='w', suffix='.fastq', delete=False) as f:
         f.write(content)
@@ -62,30 +62,29 @@ def multiple_fastq_files():
     """Create multiple temporary FASTQ files for batch testing."""
     files = []
 
-    # Create 3 test files with different content
     contents = [
         """@seq1_file1 first file sequence 1
-        ATGCGATCGATCGATCG
-        +
-        IIIIIIIIIIIIIIIII
-        @seq2_file1 first file sequence 2
-        CGATCGATCGATCGATC
-        +
-        JJJJJJJJJJJJJJJJJ""",
+ATGCGATCGATCGATCG
++
+IIIIIIIIIIIIIIIII
+@seq2_file1 first file sequence 2
+CGATCGATCGATCGATC
++
+JJJJJJJJJJJJJJJJJ""",
 
         """@seq1_file2 second file sequence 1
-        GATCGATCGATCGATCG
-        +
-        KKKKKKKKKKKKKKKKK
-        @seq2_file2 second file sequence 2
-        TGCGATCGATCGATCGA
-        +
-        LLLLLLLLLLLLLLLLL""",
+GATCGATCGATCGATCG
++
+KKKKKKKKKKKKKKKKK
+@seq2_file2 second file sequence 2
+TGCGATCGATCGATCGA
++
+LLLLLLLLLLLLLLLLL""",
 
         """@seq1_file3 third file sequence 1
-        GCGATCGATCGATCGAT
-        +
-        MMMMMMMMMMMMMMMMM"""
+GCGATCGATCGATCGAT
++
+MMMMMMMMMMMMMMMMM"""
     ]
 
     for i, content in enumerate(contents):
@@ -226,16 +225,13 @@ def test_batch_convert_multiple_files(converter, multiple_fastq_files):
     """Test batch conversion of multiple valid FASTQ files."""
     results = converter.batch_convert(multiple_fastq_files)
 
-    # Should have results for all 3 files
     assert len(results) == 3
 
-    # All results should indicate successful conversion
     for i, result in enumerate(results):
         assert "Successfully converted" in result
         assert f"_batch_test_{i+1}.fastq" in result
         assert f"_batch_test_{i+1}.fasta" in result
 
-    # Check that output files were created
     for file_path in multiple_fastq_files:
         fasta_file = file_path.replace('.fastq', '.fasta')
         assert os.path.exists(fasta_file)
@@ -252,10 +248,8 @@ def test_batch_convert_nonexistent_files(converter):
     fake_files = ["nonexistent1.fastq", "nonexistent2.fastq"]
     results = converter.batch_convert(fake_files)
 
-    # Should have results for both files
     assert len(results) == 2
 
-    # Both should be error messages
     for result in results:
         assert "Error: File not found:" in result
 
@@ -271,7 +265,6 @@ def test_batch_convert_mixed_valid_invalid(converter, sample_fastq):
         invalid_file = f.name
 
     try:
-        # Mix valid and invalid files
         mixed_files = [sample_fastq, invalid_file, "nonexistent.fastq"]
         results = converter.batch_convert(mixed_files)
 
@@ -293,11 +286,9 @@ def test_handle_batch_conversion_via_process_sequences(converter, multiple_fastq
         file_paths_string, is_file=True, seq_type=None, analysis_method="batch_convert"
     )
 
-    # Should have 3 results with proper keys
     assert len(results) == 3
     assert len(sequence_keys) == 3
 
-    # Check that keys are properly formatted
     expected_keys = ["batch_result_1", "batch_result_2", "batch_result_3"]
     assert sequence_keys == expected_keys
 

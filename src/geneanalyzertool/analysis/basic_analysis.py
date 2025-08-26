@@ -3,6 +3,7 @@ from geneanalyzertool.core.sequences import Sequence, DNA, RNA, Protein
 from geneanalyzertool.core.file_handler import FileHandler
 from typing import Any, override, List
 from geneanalyzertool.core.exceptions import InvalidSequenceTypeError, AnalysisMethodError
+import re
 
 YELLOW = "\033[1;33m"
 GREEN = "\033[1;32m"
@@ -24,7 +25,9 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
     def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
         def format_orf_result(seq_name, orf_result):
             lines = [f"Sequence Name: {seq_name}"]
+            lines.append(f"Sequence Type: {orf_result.get('Sequence_Type', 'Unknown')}")
             lines.append(f"Number of ORFs: {orf_result['Number of ORFS']}")
+            
             if orf_result['ORFS'].items():
                 for orf_name, orf_data in orf_result['ORFS'].items():
                     lines.append(f"{orf_name}: {orf_data['Sequence']}")
@@ -33,6 +36,9 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
                         f"   End: {orf_data['End']}"
                         f"   Length: {orf_data['Length']}"
                     )
+                    # Add ORF type if present
+                    if 'Type' in orf_data:
+                        lines.append(f"   Type: {orf_data['Type']}")
             else:
                 lines.append("No Open Reading Frames Found")
             return "\n".join(lines)
@@ -49,7 +55,9 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
     def print_to_terminal(self, results: dict, sequence_keys: List[str]):
         def format_orf_result(seq_name, orf_result):
             lines = [f"{YELLOW}Sequence Name: {RESET}{seq_name}"]
+            lines.append(f"{GREEN}Sequence Type:{RESET} {orf_result.get('Sequence_Type', 'Unknown')}")
             lines.append(f"{GREEN}Number of ORFs:{RESET} {orf_result['Number of ORFS']}")
+            
             if orf_result['ORFS'].items():
                 for orf_name, orf_data in orf_result['ORFS'].items():
                     lines.append(f"{GREEN}{orf_name}:{RESET} {orf_data['Sequence']}")
@@ -58,6 +66,9 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
                         f"   {CYAN}End:{RESET} {orf_data['End']}"
                         f"   {CYAN}Length:{RESET} {orf_data['Length']}"
                     )
+                    # Add ORF type if present
+                    if 'Type' in orf_data:
+                        lines.append(f"   {CYAN}Type:{RESET} {orf_data['Type']}")
             else:
                 lines.append(RED + "No Open Reading Frames Found" + RESET)
             return "\n".join(lines)
@@ -233,33 +244,68 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
             reverse_complement = sequence.translate(str.maketrans("AUGCaugc", "UACGuacg"))[::-1]
             return RNA(reverse_complement)
 
-    def _orf_finder(self, sequence: DNA):
-        if not isinstance(sequence, DNA):
-            raise TypeError("Error: Sequence must be of type DNA")
+    def _orf_finder(self, sequence: DNA | RNA):
+        """
+        Find Open Reading Frames (ORFs) in DNA or RNA sequences using optimized regex approach.
+        
+        DNA vs RNA ORF Finding:
+        - DNA sequences: Searches genomic DNA for potential ORFs including intronic regions
+        - RNA sequences: Searches transcript sequences (mRNA/cDNA) for biologically relevant ORFs
+        
+        Args:
+            sequence: DNA or RNA sequence to analyze
+            
+        Returns:
+            Dictionary containing ORF count and ORF details including positions and sequences
+            
+        Note: RNA-based ORF finding provides more biologically accurate results for protein prediction
+        as it works on already-spliced transcripts without intronic sequences.
+        """
+        if not isinstance(sequence, (DNA, RNA)):
+            raise TypeError("Error: Sequence must be of type DNA or RNA")
 
-        start_codons = ["ATG"]
-        stop_codons = ["TAA", "TAG", "TGA"]
+        if isinstance(sequence, DNA):
+            start_codon = "ATG"
+            stop_codons = ["TAA", "TAG", "TGA"]
+            seq_type = "DNA"
+            orf_type = "DNA-based ORF"
+        else:  # RNA
+            start_codon = "AUG"
+            stop_codons = ["UAA", "UAG", "UGA"]
+            seq_type = "RNA"
+            orf_type = "RNA-based ORF (transcript)"
+        
+        seq_upper = str(sequence).upper()
+        
+        start_positions = [match.start() for match in re.finditer(start_codon, seq_upper)]
+        
         ORFS = {}
         ORF_count = 0
-        for i in range(0, len(sequence)):
-            codon = sequence[i:i + 3].upper()
-            if codon not in start_codons:
-                continue
-            for j in range(i, len(sequence), 3):
-                codon = sequence[j:j + 3]
+        
+        for start_pos in start_positions:
+            for pos in range(start_pos + 3, len(seq_upper) - 2, 3):
+                codon = seq_upper[pos:pos + 3]
+                
+                if len(codon) < 3:
+                    break
+                    
                 if codon in stop_codons:
                     ORF_count += 1
                     orf_name = f"ORF_{ORF_count}"
-                    orf_seq = sequence[i:j+3]
+                    orf_seq = sequence[start_pos:pos + 3]
+                    
                     ORFS[orf_name] = {
-                        "Sequence": orf_seq,
-                        "Start": i,
-                        "End": j + 2,
-                        "Length": (j + 3) - i
+                        "Sequence": str(orf_seq),
+                        "Start": start_pos,
+                        "End": pos + 2,
+                        "Length": (pos + 3) - start_pos,
+                        "Type": orf_type
                     }
                     break
+        
         result = {
             "Number of ORFS": ORF_count,
-            "ORFS": ORFS
+            "ORFS": ORFS,
+            "Sequence_Type": seq_type
         }
         return result
