@@ -1,5 +1,4 @@
 import os
-import glob
 from typing import Any, override, List
 from geneanalyzertool.analysis.analysis import Analysis
 from geneanalyzertool.core.file_handler import FileHandler
@@ -52,6 +51,8 @@ class FileConversion(Analysis, FileHandler):
             return self._handle_conversion(sequence_input)
         elif analysis_method == "validate":
             return self._handle_validation(sequence_input)
+        elif analysis_method == "batch_convert":
+            return self._handle_batch_conversion(sequence_input)
         else:
             raise AnalysisMethodError(f"Error: Unknown file conversion method: {analysis_method}")
 
@@ -93,6 +94,33 @@ class FileConversion(Analysis, FileHandler):
             return {"validation_result": result}, ["validation_result"]
         else:
             raise AnalysisMethodError(f"Unsupported file format for validation: {file_ext}")
+
+    def _handle_batch_conversion(self, file_paths_string: str):
+        """Handle batch conversion of multiple files.
+
+        Args:
+            file_paths_string: Comma-separated string of file paths
+
+        Returns:
+            Results dictionary and sequence keys
+        """
+        # Parse comma-separated file paths
+        file_paths = [path.strip() for path in file_paths_string.split(',') if path.strip()]
+
+        if not file_paths:
+            raise SequenceParsingError("Error: No file paths provided for batch conversion")
+
+        results = self.batch_convert(file_paths)
+
+        # Create a dictionary with numbered results
+        result_dict = {}
+        sequence_keys = []
+        for i, result in enumerate(results, 1):
+            key = f"batch_result_{i}"
+            result_dict[key] = result
+            sequence_keys.append(key)
+
+        return result_dict, sequence_keys
 
     def _fastq_to_fasta(self, fastq_file: str) -> str:
         """
@@ -143,23 +171,27 @@ class FileConversion(Analysis, FileHandler):
 
         return f"Successfully converted {record_count} sequences from {fastq_file} to {fasta_file}"
 
-    def batch_convert(self, pattern: str) -> List[str]:
+    def batch_convert(self, file_paths: List[str]) -> List[str]:
         """
-        Convert multiple files matching a pattern.
+        Convert multiple files to FASTA format.
 
         Args:
-            pattern: Glob pattern for files to convert
+            file_paths: List of file paths to convert
 
         Returns:
-            List of conversion results
+            List of conversion results for each file
         """
-        files = glob.glob(pattern)
-        if not files:
-            raise SequenceParsingError(f"Error: No files found matching pattern: {pattern}")
+        if not file_paths:
+            raise SequenceParsingError("Error: No file paths provided for batch conversion")
 
         results = []
-        for file_path in files:
+        for file_path in file_paths:
             try:
+                # Check if file exists before attempting conversion
+                if not os.path.exists(file_path):
+                    results.append(f"Error: File not found: {file_path}")
+                    continue
+
                 result = self._fastq_to_fasta(file_path)
                 results.append(result)
             except Exception as e:

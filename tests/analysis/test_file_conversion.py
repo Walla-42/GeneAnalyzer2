@@ -32,6 +32,7 @@ KKKKKKKKKKKKKKKKK
 
     yield temp_file
 
+    # cleanup
     if os.path.exists(temp_file):
         os.unlink(temp_file)
 
@@ -51,8 +52,56 @@ def invalid_fastq():
 
     yield temp_file
 
+    # cleanup
     if os.path.exists(temp_file):
         os.unlink(temp_file)
+
+
+@pytest.fixture
+def multiple_fastq_files():
+    """Create multiple temporary FASTQ files for batch testing."""
+    files = []
+
+    # Create 3 test files with different content
+    contents = [
+        """@seq1_file1 first file sequence 1
+        ATGCGATCGATCGATCG
+        +
+        IIIIIIIIIIIIIIIII
+        @seq2_file1 first file sequence 2
+        CGATCGATCGATCGATC
+        +
+        JJJJJJJJJJJJJJJJJ""",
+
+        """@seq1_file2 second file sequence 1
+        GATCGATCGATCGATCG
+        +
+        KKKKKKKKKKKKKKKKK
+        @seq2_file2 second file sequence 2
+        TGCGATCGATCGATCGA
+        +
+        LLLLLLLLLLLLLLLLL""",
+
+        """@seq1_file3 third file sequence 1
+        GCGATCGATCGATCGAT
+        +
+        MMMMMMMMMMMMMMMMM"""
+    ]
+
+    for i, content in enumerate(contents):
+        with tempfile.NamedTemporaryFile(mode='w', suffix=f'_batch_test_{i+1}.fastq', delete=False) as f:
+            f.write(content)
+            files.append(f.name)
+
+    yield files
+
+    # cleanup
+    for file_path in files:
+        if os.path.exists(file_path):
+            os.unlink(file_path)
+        fasta_file = file_path.replace('.fastq', '.fasta')
+        if os.path.exists(fasta_file):
+            os.unlink(fasta_file)
 
 
 def test_process_sequences_requires_file_input(converter):
@@ -171,3 +220,106 @@ def test_unknown_analysis_method(converter, sample_fastq):
     """Test handling of unknown analysis methods."""
     with pytest.raises(AnalysisMethodError, match="Unknown file conversion method"):
         converter.process_sequences(sample_fastq, is_file=True, seq_type=None, analysis_method="unknown")
+
+
+def test_batch_convert_multiple_files(converter, multiple_fastq_files):
+    """Test batch conversion of multiple valid FASTQ files."""
+    results = converter.batch_convert(multiple_fastq_files)
+
+    # Should have results for all 3 files
+    assert len(results) == 3
+
+    # All results should indicate successful conversion
+    for i, result in enumerate(results):
+        assert "Successfully converted" in result
+        assert f"_batch_test_{i+1}.fastq" in result
+        assert f"_batch_test_{i+1}.fasta" in result
+
+    # Check that output files were created
+    for file_path in multiple_fastq_files:
+        fasta_file = file_path.replace('.fastq', '.fasta')
+        assert os.path.exists(fasta_file)
+
+
+def test_batch_convert_empty_list(converter):
+    """Test batch conversion with empty file list."""
+    with pytest.raises(SequenceParsingError, match="No file paths provided for batch conversion"):
+        converter.batch_convert([])
+
+
+def test_batch_convert_nonexistent_files(converter):
+    """Test batch conversion with nonexistent files."""
+    fake_files = ["nonexistent1.fastq", "nonexistent2.fastq"]
+    results = converter.batch_convert(fake_files)
+
+    # Should have results for both files
+    assert len(results) == 2
+
+    # Both should be error messages
+    for result in results:
+        assert "Error: File not found:" in result
+
+
+def test_batch_convert_mixed_valid_invalid(converter, sample_fastq):
+    """Test batch conversion with mix of valid and invalid files."""
+
+    invalid_content = """not a valid fastq
+    this will fail
+    """
+    with tempfile.NamedTemporaryFile(mode='w', suffix='_invalid.fastq', delete=False) as f:
+        f.write(invalid_content)
+        invalid_file = f.name
+
+    try:
+        # Mix valid and invalid files
+        mixed_files = [sample_fastq, invalid_file, "nonexistent.fastq"]
+        results = converter.batch_convert(mixed_files)
+
+        assert len(results) == 3
+        assert "Successfully converted" in results[0]
+        assert "Warning: Failed to convert" in results[1]
+        assert "Error: File not found:" in results[2]
+
+    finally:
+        if os.path.exists(invalid_file):
+            os.unlink(invalid_file)
+
+
+def test_handle_batch_conversion_via_process_sequences(converter, multiple_fastq_files):
+    """Test batch conversion through the main process_sequences interface."""
+    file_paths_string = ",".join(multiple_fastq_files)
+
+    results, sequence_keys = converter.process_sequences(
+        file_paths_string, is_file=True, seq_type=None, analysis_method="batch_convert"
+    )
+
+    # Should have 3 results with proper keys
+    assert len(results) == 3
+    assert len(sequence_keys) == 3
+
+    # Check that keys are properly formatted
+    expected_keys = ["batch_result_1", "batch_result_2", "batch_result_3"]
+    assert sequence_keys == expected_keys
+
+    for key in sequence_keys:
+        assert "Successfully converted" in results[key]
+
+
+def test_handle_batch_conversion_empty_string(converter):
+    """Test batch conversion with empty or whitespace-only string."""
+    with pytest.raises(SequenceParsingError, match="No file paths provided for batch conversion"):
+        converter.process_sequences("", is_file=True, seq_type=None, analysis_method="batch_convert")
+
+    with pytest.raises(SequenceParsingError, match="No file paths provided for batch conversion"):
+        converter.process_sequences("   ,  ,  ", is_file=True, seq_type=None, analysis_method="batch_convert")
+
+
+def test_handle_batch_conversion_single_file(converter, sample_fastq):
+    """Test batch conversion with a single file."""
+    results, sequence_keys = converter.process_sequences(
+        sample_fastq, is_file=True, seq_type=None, analysis_method="batch_convert"
+    )
+
+    assert len(results) == 1
+    assert sequence_keys == ["batch_result_1"]
+    assert "Successfully converted" in results["batch_result_1"]
