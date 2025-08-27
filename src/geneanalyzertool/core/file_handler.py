@@ -13,13 +13,32 @@ class FileHandler():
     """Handles file operations for GeneAnalyzer2 tool."""
 
     def __init__(self):
+        """
+        Initialize the FileHandler.
+        """
         pass
 
     def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
+        """
+        Export results to a file. Must be implemented by subclasses.
+        
+        Args:
+            results (dict): Dictionary mapping sequence keys to results
+            sequence_keys (List[str]): Ordered list of sequence identifiers
+            out_file (str): Path to output file where results will be written
+        """
         raise NotImplementedError("Subclasses must implement this method.")
 
     def file_support_check(self, file: str) -> bool:
-        """Check if the file has a supported extension (.fna or .fasta)."""
+        """
+        Check if the file has a supported extension (.fna or .fasta).
+        
+        Args:
+            file (str): Path to the file to check
+            
+        Returns:
+            bool: True if file extension is supported, False otherwise
+        """
         if file.endswith(".fna") or file.endswith(".fasta"):
             print('\033[1;33mOpening and parsing file...\033[0m')
             return True
@@ -28,22 +47,31 @@ class FileHandler():
             return False
 
     def read_sequences(self, fasta_file: str) -> dict:
-        """Parse all sequences from a FASTA file into a dictionary."""
+        """
+        Parse all sequences from a FASTA file into a dictionary.
+        
+        Args:
+            fasta_file (str): Path to the FASTA file to parse
+            
+        Returns:
+            dict: Dictionary mapping sequence IDs to sequence objects
+        """
         sequence_dict = {}
         for record in SeqIO.parse(fasta_file, 'fasta'):
             sequence_dict[record.id] = record.seq
         return sequence_dict
 
     def select_sequences(self, fasta_file: str, selection_func=input, max_attempts: int = 3):
-        """User-guided sequence selection with numbered options.
+        """
+        User-guided sequence selection with numbered options from a FASTA file.
 
         Args:
-            fasta_file: Path to the FASTA file.
-            selection_func: Function to get user input (can be mocked in tests).
-            max_attempts: Maximum number of invalid attempts before raising an error.
+            fasta_file (str): Path to the FASTA file
+            selection_func (callable): Function to get user input (can be mocked in tests)
+            max_attempts (int): Maximum number of invalid attempts before raising an error
 
         Returns:
-            Tuple[dict, list]: Selected sequences dictionary and ordered list of keys.
+            Tuple[dict, List[str]]: Selected sequences dictionary and ordered list of keys
         """
         sequences = self.read_sequences(fasta_file)
         keys = list(sequences.keys())

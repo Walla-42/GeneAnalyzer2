@@ -23,6 +23,18 @@ analysis_options = {
 
 # if a new analysis is added to analysis_options, it must also be added to the map above.
 def parse_args():
+    """
+    Parse command-line arguments for the GeneAnalyzer2 tool.
+    
+    Returns:
+        argparse.Namespace: Parsed command-line arguments containing:
+            - sequence: Sequence string or file path
+            - file: Boolean flag for file input
+            - type: Sequence type (DNA, RNA, Protein)
+            - mode: Analysis mode (basic, file_conv)
+            - analysis: Specific analysis method to perform
+            - out: Optional output file path
+    """
     parser = argparse.ArgumentParser(
         prog='GeneAnalyzer2',
         description='Command-line bioinformatics tool for analyzing DNA, RNA, and protein sequences.'
@@ -70,6 +82,15 @@ def parse_args():
 
 
 def main():
+    """
+    Main entry point for the GeneAnalyzer2 command-line tool.
+    
+    Parses command-line arguments, validates inputs, instantiates the appropriate
+    analysis class, processes sequences, and outputs results either to stdout
+    or to a specified output file.
+    
+    Handles various exceptions and exits with appropriate error codes.
+    """
     args = parse_args()
 
     # Validate required arguments based on mode

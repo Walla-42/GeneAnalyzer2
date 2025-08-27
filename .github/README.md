@@ -8,7 +8,7 @@
 
 # GeneAnalyzer2
 
-GeneAnalyzer2 is a command-line bioinformatics tool for analyzing DNA, RNA, and protein sequences. It supports a variety of analyses, including GC content, base counting, transcription, translation, reverse complement strand synthesis, and now a new open reading frame finder. The tool can process both raw sequence strings and multi-sequence FASTA files.
+GeneAnalyzer2 is a command-line bioinformatics tool for analyzing DNA, RNA, and protein sequences. It supports a variety of analyses, including GC content, base counting, transcription, translation, reverse complement strand synthesis, open reading frame finding, and file format conversion. The tool can process both raw sequence strings and multi-sequence FASTA files, and includes powerful file conversion capabilities.
 
 This program replaces the original GeneAnalyzer interactive command line program which can be found <a href="http://github.com/walla-42/GeneAnalyzer">here</a>.
 
@@ -16,36 +16,92 @@ This program replaces the original GeneAnalyzer interactive command line program
 
 ## Features
 
+### Sequence Analysis
 - Analyze DNA, RNA, or protein sequences
-- Supports raw sequence input or FASTA file input
-- Multiple analysis modes (easily extensible)
-- Output results to terminal or file
+- GC content calculation with percentage formatting
+- Nucleotide base counting
+- DNA transcription to RNA
+- RNA translation to protein
+- Reverse complement generation
+- Open Reading Frame (ORF) detection for both DNA and RNA
+- Support for both raw sequence input and FASTA file input
+
+### File Operations
+- **File Format Conversion**: Convert FASTQ files to FASTA format
+- **Batch Processing**: Convert multiple files simultaneously
+- **File Validation**: Validate FASTQ file format and integrity
+- **Multi-sequence Support**: Process multiple sequences from FASTA files
+
+### Output & Usability
+- Colored terminal output for better readability
+- Save results to files
+- Improved error handling with informative messages
 - Modular, extensible design for future analyses
+
+---
+
+## Documentation
+
+📚 **Comprehensive Documentation Available:**
+
+- **[User Guide](docs/USER_GUIDE.md)** - Installation and getting started  
+- **[Examples](docs/EXAMPLES.md)** - Command reference and practical examples
+- **[Documentation](docs/DOCUMENTATION.md)** - Technical documentation of classes and methods
+- **[Developer Guide](docs/DEVELOPER.md)** - How to extend and contribute to the project
 
 ---
 
 
 
-## Install directly from GitHub
+## Quick Start
+
+### Basic Installation
 ```sh
-    pip install git+https://github.com/Walla-42/GeneAnalyzer2.git
+pip install git+https://github.com/Walla-42/GeneAnalyzer2.git
 ```
 
-## Development Setup
-If you would like to work on this project, view how to contribute <a href="/.github/CONTRIBUTING.md">here</a>.
+### Simple Usage Examples
 
-## Usage
+```bash
+# Calculate GC content
+geneanalyzer2 --type DNA --analysis gc_percent "ATGCATGC"
 
-You can run GeneAnalyzer2 using Poetry's script entry point or directly with Python. The CLI supports both raw sequence and FASTA file input.
+# Find Open Reading Frames
+geneanalyzer2 --type DNA --analysis orf "ATGGGGGCGCGCGCGCGCGCGCGCGCGAGTTAG"
 
-### Command Line Arguments
+# Convert FASTQ to FASTA
+geneanalyzer2 --mode file_conv --analysis convert --file sequences.fastq
 
-- `-f`, `--file` (optional): Treat the sequence argument as a file path (FASTA format).
-- `sequence/sequence_file` (positional): The raw sequence string or path to a FASTA file.
-- `-t`, `--type` (required): Sequence type (`DNA`, `RNA`, or `Protein`).
-- `-m`, `--mode` (optional): Analysis mode/class (default: `basic`).
-- `-a`, `--analysis` (required): Analysis type (e.g., `gc_percent`, `base_count`, `transcribe`, `translate`, `reverse_complement`, `orf`).
-- `-o`, `--out` (optional): Output file (default: print to terminal).
+# Analyze sequences from FASTA file
+geneanalyzer2 --file sequences.fasta --type DNA --analysis gc_percent --out results.txt
+```
+
+For detailed instructions, see the [User Guide](docs/USER_GUIDE.md).
+
+---
+
+## Analysis Modes
+
+### Basic Mode (`--mode basic`)
+Sequence analysis operations:
+
+| Analysis | Description | Input Types |
+|----------|-------------|-------------|
+| `gc_percent` | Calculate GC content percentage | DNA, RNA |
+| `base_count` | Count nucleotide bases | DNA, RNA |  
+| `transcribe` | Transcribe DNA to RNA | DNA |
+| `translate` | Translate RNA to protein | RNA |
+| `reverse_complement` | Generate reverse complement | DNA, RNA |
+| `orf` | Find Open Reading Frames | DNA, RNA |
+
+### File Conversion Mode (`--mode file_conv`)
+File format operations:
+
+| Analysis | Description | Input | Output |
+|----------|-------------|-------|--------|
+| `convert` | Convert file format | FASTQ | FASTA |
+| `validate` | Validate file format | FASTQ | Validation report |
+| `batch_convert` | Convert multiple files | Multiple FASTQ | Multiple FASTA |
 
 ---
 

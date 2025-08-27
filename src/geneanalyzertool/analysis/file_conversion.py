@@ -21,8 +21,14 @@ class FileConversion(Analysis, FileHandler):
     @override
     def analyze(self, sequence: Sequence, method: str) -> Any:
         """
-        This method is not used for file conversion as we work directly with files.
-        File conversion operates on file paths rather than sequence objects.
+        Not implemented for file conversion as it operates on files rather than sequence objects.
+        
+        Args:
+            sequence (Sequence): Sequence object (not used)
+            method (str): Analysis method (not used)
+            
+        Raises:
+            AnalysisMethodError: Always raised as this method is not supported
         """
         raise AnalysisMethodError("File conversion operates on files, not individual sequences. Use process_sequences instead.")
 
@@ -32,16 +38,13 @@ class FileConversion(Analysis, FileHandler):
         Process file conversion operations.
 
         Args:
-            sequence_input: File path (or pattern for batch operations)
-            is_file: Must be True for file conversion
-            seq_type: Not used in file conversion
-            analysis_method: Type of conversion (e.g., 'convert')
+            sequence_input (str): File path (or pattern for batch operations)
+            is_file (bool): Must be True for file conversion
+            seq_type (str): Not used in file conversion
+            analysis_method (str): Type of conversion (e.g., 'convert', 'validate', 'batch_convert')
 
         Returns:
-            Results dictionary and sequence keys
-
-        Note: If you are making modifications to the File Mode, add the analysis_method below then add a helper function
-        to call your process.
+            Tuple[dict, List[str]]: Results dictionary and sequence keys
         """
         if not is_file:
             raise AnalysisMethodError("Error: File conversion requires a file input. Use --file flag.")
@@ -57,11 +60,14 @@ class FileConversion(Analysis, FileHandler):
             raise AnalysisMethodError(f"Error: Unknown file conversion method: {analysis_method}")
 
     def _handle_conversion(self, file_path: str):
-        """Handle file conversion based on input file extension.
-        Args: file_path Takes in path to file
-        Returns: Dictionary with conversion result and list of sequence keys
-
-        Note: if you are adding a file conversion method, add the function call below.
+        """
+        Handle file conversion based on input file extension.
+        
+        Args:
+            file_path (str): Path to the file to convert
+            
+        Returns:
+            Tuple[dict, List[str]]: Dictionary with conversion result and list of sequence keys
         """
         if not os.path.exists(file_path):
             raise SequenceParsingError(f"Error: File not found: {file_path}")
@@ -76,7 +82,15 @@ class FileConversion(Analysis, FileHandler):
             raise AnalysisMethodError(f"Error: Unsupported file format for conversion: {file_ext}")
 
     def _handle_validation(self, file_path: str):
-        """Handle file validation based on input file extension."""
+        """
+        Handle file validation based on input file extension.
+        
+        Args:
+            file_path (str): Path to the file to validate
+            
+        Returns:
+            Tuple[dict, List[str]]: Dictionary with validation result and list of sequence keys
+        """
         if not os.path.exists(file_path):
             raise SequenceParsingError(f"Error: File not found: {file_path}")
 
@@ -96,13 +110,14 @@ class FileConversion(Analysis, FileHandler):
             raise AnalysisMethodError(f"Unsupported file format for validation: {file_ext}")
 
     def _handle_batch_conversion(self, file_paths_string: str):
-        """Handle batch conversion of multiple files.
+        """
+        Handle batch conversion of multiple files.
 
         Args:
-            file_paths_string: Comma-separated string of file paths
+            file_paths_string (str): Comma-separated string of file paths
 
         Returns:
-            Results dictionary and sequence keys
+            Tuple[dict, List[str]]: Results dictionary and sequence keys
         """
         # Parse comma-separated file paths
         file_paths = [path.strip() for path in file_paths_string.split(',') if path.strip()]
@@ -263,13 +278,26 @@ class FileConversion(Analysis, FileHandler):
 
     @override
     def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
-        """Export conversion results to file."""
+        """
+        Export conversion results to a file.
+        
+        Args:
+            results (dict): Dictionary mapping sequence keys to conversion results
+            sequence_keys (List[str]): Ordered list of sequence identifiers
+            out_file (str): Path to output file where results will be written
+        """
         with open(out_file, 'w') as outfile:
             for key in sequence_keys:
                 outfile.write(f"{results[key]}\n")
 
     @override
     def print_to_terminal(self, results: dict, sequence_keys: List[str]):
-        """Print conversion results to terminal."""
+        """
+        Print conversion results to terminal with colored formatting.
+        
+        Args:
+            results (dict): Dictionary mapping sequence keys to conversion results
+            sequence_keys (List[str]): Ordered list of sequence identifiers
+        """
         for key in sequence_keys:
             print(f"{GREEN}{results[key]}{RESET}")

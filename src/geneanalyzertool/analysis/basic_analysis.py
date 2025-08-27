@@ -23,6 +23,14 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
     @override
     def export_to_file(self, results: dict, sequence_keys: List[str], out_file: str):
+        """
+        Export analysis results to a file with special formatting for ORF results.
+        
+        Args:
+            results (dict): Dictionary mapping sequence keys to analysis results
+            sequence_keys (List[str]): Ordered list of sequence identifiers
+            out_file (str): Path to output file where results will be written
+        """
         def format_orf_result(seq_name, orf_result):
             lines = [f"Sequence Name: {seq_name}"]
             lines.append(f"Sequence Type: {orf_result.get('Sequence_Type', 'Unknown')}")
@@ -53,6 +61,13 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
     @override
     def print_to_terminal(self, results: dict, sequence_keys: List[str]):
+        """
+        Print analysis results to terminal with colored formatting.
+        
+        Args:
+            results (dict): Dictionary mapping sequence keys to analysis results
+            sequence_keys (List[str]): Ordered list of sequence identifiers
+        """
         def format_orf_result(seq_name, orf_result):
             lines = [f"{YELLOW}Sequence Name: {RESET}{seq_name}"]
             lines.append(f"{GREEN}Sequence Type:{RESET} {orf_result.get('Sequence_Type', 'Unknown')}")
@@ -111,13 +126,13 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
         Process one or more sequences and perform the specified analysis.
 
         Args:
-            sequence_input: Either a sequence string or file path
-            is_file: Whether sequence_input is a file path
-            seq_type: Type of sequence (DNA, RNA, or Protein)
-            analysis_method: Analysis method to perform
+            sequence_input (str): Either a sequence string or file path
+            is_file (bool): Whether sequence_input is a file path
+            seq_type (str): Type of sequence (DNA, RNA, or Protein)
+            analysis_method (str): Analysis method to perform
 
         Returns:
-            List of result strings
+            Tuple[dict, List[str]]: Analysis results and list of sequence keys
         """
 
         # Get sequences to analyze
@@ -152,8 +167,13 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
     def _gc_percent(self, sequence: DNA | RNA) -> str:
         """
-        Calculates the percent Guanine and Cytosine that are present in a DNA or RNA Molecule.
-        Sequence must be of type RNA or DNA.
+        Calculate the percent Guanine and Cytosine content in a DNA or RNA sequence.
+        
+        Args:
+            sequence (DNA | RNA): DNA or RNA sequence to analyze
+            
+        Returns:
+            str: GC percentage formatted as a string with '%' symbol
         """
         if not isinstance(sequence, (DNA, RNA)):
             raise TypeError("Error: Sequence must be of type DNA or RNA")
@@ -163,8 +183,13 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
     def _base_count(self, sequence) -> dict:
         """
-        Counts the number of each base in a DNA sequence.
-        Sequence provided must be of type DNA or RNA.
+        Count the number of each nucleotide base in a DNA or RNA sequence.
+        
+        Args:
+            sequence (DNA | RNA): DNA or RNA sequence to analyze
+            
+        Returns:
+            dict: Dictionary with base counts for A, T, G, C
         """
         base_counts = {
             'A': sequence.upper().count('A'),
@@ -177,8 +202,13 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
     def _translate(self, sequence) -> Protein:
         """
-        Translates a given RNA sequence into a predicted protein sequence minus
-        post translational modifications. Sequence provided must be of type RNA.
+        Translate an RNA sequence into a protein sequence using the standard genetic code.
+        
+        Args:
+            sequence (RNA): RNA sequence to translate
+            
+        Returns:
+            Protein: Translated protein sequence with '*' for stop codons
         """
         peptide_table = {
             "UUU": "F", "UUC": "F", "UUA": "L", "UUG": "L",
@@ -219,8 +249,13 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
     def _transcribe(self, sequence: DNA) -> RNA:
         """
-        Transcribes a given DNA sequence into an RNA sequence.
-        Sequence provided must be of type DNA.
+        Transcribe a DNA sequence into an RNA sequence by replacing T with U.
+        
+        Args:
+            sequence (DNA): DNA sequence to transcribe
+            
+        Returns:
+            RNA: Transcribed RNA sequence
         """
         if not isinstance(sequence, DNA):
             raise TypeError("Error: Sequence must be of type DNA")
@@ -230,8 +265,13 @@ class BasicSequenceAnalysis(Analysis, FileHandler):
 
     def _reverse_complement(self, sequence: DNA | RNA) -> DNA | RNA:
         """
-        Returns the reverse complement of a given DNA sequence.
-        Sequence provided must be of type DNA.
+        Generate the reverse complement of a DNA or RNA sequence.
+        
+        Args:
+            sequence (DNA | RNA): DNA or RNA sequence to reverse complement
+            
+        Returns:
+            DNA | RNA: Reverse complement sequence of the same type as input
         """
         if not isinstance(sequence, (DNA, RNA)):
             raise TypeError("Error: Sequence must be of type DNA or RNA")
