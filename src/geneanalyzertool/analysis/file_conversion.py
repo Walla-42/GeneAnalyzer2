@@ -120,7 +120,7 @@ class FileConversion(Analysis, FileHandler):
             Tuple[dict, List[str]]: Results dictionary and sequence keys
         """
         # Parse comma-separated file paths
-        file_paths = [path.strip() for path in file_paths_string.split(',') if path.strip()]
+        file_paths = [path.strip() for path in file_paths_string.split(' ') if path.strip()]
 
         if not file_paths:
             raise SequenceParsingError("Error: No file paths provided for batch conversion")
